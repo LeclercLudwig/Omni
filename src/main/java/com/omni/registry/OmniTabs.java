@@ -20,8 +20,10 @@ public final class OmniTabs {
                     .title(Component.translatable("itemGroup.omni"))
                     .withTabsBefore(CreativeModeTabs.COMBAT)
                     .icon(() -> BlasterItem.create(Omni.id("blaster_rifle")))
-                    .displayItems((params, output) -> WeaponManager.all(true).keySet()
-                            .forEach(id -> output.accept(BlasterItem.create(id))))
+                    .displayItems((params, output) -> {
+                        WeaponManager.all(true).keySet().forEach(id -> output.accept(BlasterItem.create(id)));
+                        output.accept(OmniItems.SOLDIER_SPAWN_EGG.get());
+                    })
                     .build());
 
     private OmniTabs() {}

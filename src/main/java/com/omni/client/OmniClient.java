@@ -29,6 +29,7 @@ public class OmniClient {
 
     private static void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {
         event.registerEntityRenderer(OmniEntities.BOLT.get(), BoltRenderer::new);
+        event.registerEntityRenderer(OmniEntities.SOLDIER.get(), SoldierRenderer::new);
     }
 
     private static void registerGuiLayers(RegisterGuiLayersEvent event) {

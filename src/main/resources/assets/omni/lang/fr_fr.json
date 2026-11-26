@@ -17,5 +17,7 @@
   "tooltip.omni.bolt_type.ion": "Tir ionique",
   "death.attack.omni.blaster": "%1$s a été abattu par %2$s",
   "death.attack.omni.blaster.item": "%1$s a été abattu par %2$s avec %3$s",
-  "death.attack.omni.blaster.player": "%1$s a été abattu en combattant %2$s"
+  "death.attack.omni.blaster.player": "%1$s a été abattu en combattant %2$s",
+  "entity.omni.soldier": "Soldat",
+  "item.omni.soldier_spawn_egg": "Œuf d'apparition de soldat"
 }

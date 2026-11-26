@@ -23,8 +23,19 @@ Java 21 est téléchargé automatiquement par Gradle si besoin. En jeu : onglet 
 ./gradlew runGameTestServer
 ```
 
-10 GameTests (`gametest/BlasterGameTests`) vérifient la cadence, la dispersion, la surchauffe,
-les dégâts, les headshots et les effets stun/ion. Ils tournent aussi sur GitHub Actions à chaque push.
+17 GameTests (`gametest/`) vérifient la cadence, la dispersion, la surchauffe, les dégâts,
+les headshots, les effets stun/ion, la prédiction et le comportement des soldats. Ils tournent aussi sur GitHub Actions à chaque push.
+
+## Soldats
+
+Ennemis armés des mêmes blasters que le joueur (fusil, pistolet ou répéteur lourd) :
+
+- gardent leurs distances, se déplacent latéralement et tirent par rafales après un temps de réaction ;
+- vont se mettre à couvert (hors de vue) quand leur arme surchauffe ou qu'ils sont blessés ;
+- préviennent les soldats proches quand ils repèrent une cible ; leurs tirs traversent leurs alliés ;
+- précision selon la difficulté ; apparaissent la nuit par groupes de 2 à 4 (`data/omni/neoforge/biome_modifier`).
+
+Œuf d'apparition dans l'onglet créatif **Omni**.
 
 ## Ajouter une arme
 

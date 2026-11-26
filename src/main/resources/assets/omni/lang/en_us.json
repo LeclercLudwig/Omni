@@ -17,5 +17,7 @@
   "tooltip.omni.bolt_type.ion": "Ion bolt",
   "death.attack.omni.blaster": "%1$s was shot by %2$s",
   "death.attack.omni.blaster.item": "%1$s was shot by %2$s using %3$s",
-  "death.attack.omni.blaster.player": "%1$s was shot while fighting %2$s"
+  "death.attack.omni.blaster.player": "%1$s was shot while fighting %2$s",
+  "entity.omni.soldier": "Soldier",
+  "item.omni.soldier_spawn_egg": "Soldier Spawn Egg"
 }

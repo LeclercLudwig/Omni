@@ -188,6 +188,14 @@ public class BoltEntity extends Projectile {
         }
     }
 
+    /** Pas de tir ami : un projectile traverse les alliés de son tireur (même escouade, même équipe). */
+    @Override
+    protected boolean canHitEntity(Entity target) {
+        Entity owner = getOwner();
+        if (owner != null && owner.isAlliedTo(target)) return false;
+        return super.canHitEntity(target);
+    }
+
     /** Les tirs ne sont pas sauvegardés avec le chunk. */
     @Override
     public boolean shouldBeSaved() {

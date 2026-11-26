@@ -2,6 +2,7 @@ package com.omni.registry;
 
 import com.omni.Omni;
 import com.omni.entity.BoltEntity;
+import com.omni.entity.SoldierEntity;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
@@ -18,6 +19,13 @@ public final class OmniEntities {
                     .clientTrackingRange(8)
                     .updateInterval(1) // position envoyée chaque tick : indispensable pour un projectile rapide
                     .build("bolt"));
+
+    public static final DeferredHolder<EntityType<?>, EntityType<SoldierEntity>> SOLDIER =
+            ENTITIES.register("soldier", () -> EntityType.Builder.<SoldierEntity>of(SoldierEntity::new, MobCategory.MONSTER)
+                    .sized(0.6F, 1.95F)
+                    .eyeHeight(1.62F)
+                    .clientTrackingRange(8)
+                    .build("soldier"));
 
     private OmniEntities() {}
 }
