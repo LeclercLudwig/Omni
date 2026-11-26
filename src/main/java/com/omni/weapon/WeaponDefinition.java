@@ -15,7 +15,7 @@ import java.util.Optional;
  * Tous les champs sauf {@code damage} ont une valeur par défaut.
  */
 public record WeaponDefinition(
-        FireMode fireMode,
+        FiringSettings firing,
         BoltType boltType,
         float damage,
         float boltSpeed,
@@ -84,7 +84,7 @@ public record WeaponDefinition(
             c -> String.format("#%06X", c & 0xFFFFFF));
 
     public static final Codec<WeaponDefinition> CODEC = RecordCodecBuilder.create(i -> i.group(
-            FireMode.CODEC.optionalFieldOf("fire_mode", FireMode.SEMI).forGetter(WeaponDefinition::fireMode),
+            FiringSettings.MAP_CODEC.forGetter(WeaponDefinition::firing),
             BoltType.CODEC.optionalFieldOf("bolt_type", BoltType.STANDARD).forGetter(WeaponDefinition::boltType),
             Codec.floatRange(0, 1000).fieldOf("damage").forGetter(WeaponDefinition::damage),
             // 3.9 max : au-delà, le paquet d'apparition vanilla tronque la vitesse côté client.
@@ -102,6 +102,10 @@ public record WeaponDefinition(
                     .forGetter(WeaponDefinition::fireSound),
             Magazine.CODEC.optionalFieldOf("magazine").forGetter(WeaponDefinition::magazine)
     ).apply(i, WeaponDefinition::new));
+
+    public FireMode fireMode() {
+        return firing.mode();
+    }
 
     /** Pour la synchro serveur → client (passe par NBT, largement suffisant pour quelques armes). */
     public static final StreamCodec<ByteBuf, WeaponDefinition> STREAM_CODEC = ByteBufCodecs.fromCodec(CODEC);

@@ -3,7 +3,10 @@ package com.omni.client;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import com.omni.weapon.BlasterItem;
+import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.item.ItemStack;
@@ -14,6 +17,12 @@ import net.neoforged.neoforge.client.extensions.common.IClientItemExtensions;
  * (bras + balancement d'attaque) pour ramener l'arme au centre quand on vise.
  */
 public class BlasterClientExtensions implements IClientItemExtensions {
+    /** Vue à la 3e personne : arme épaulée à deux mains (les modèles sont conçus pour cette pose). */
+    @Override
+    public HumanoidModel.ArmPose getArmPose(LivingEntity entity, InteractionHand hand, ItemStack stack) {
+        return HumanoidModel.ArmPose.CROSSBOW_HOLD;
+    }
+
     private static float reloadDip(LocalPlayer player, ItemStack stack, float partialTick) {
         return BlasterItem.definition(true, stack).map(def -> {
             float progress = BlasterItem.magazine(stack).reloadProgress(def, player.level().getGameTime(), partialTick);

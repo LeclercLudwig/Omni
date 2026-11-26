@@ -32,6 +32,10 @@ public final class BlasterLogic {
     private static final double SPREAD_SCALE = 0.0172275;
     private static final long RESYNC_COOLDOWN_TICKS = 10;
 
+    private static final int CHARGE_TOLERANCE_TICKS = 2;
+    /** Début de charge par joueur (thread serveur uniquement, non persistant). */
+    private static final Map<ServerPlayer, Long> CHARGE_START = new WeakHashMap<>();
+
     /** Dernier renvoi d'inventaire par joueur (thread serveur uniquement). */
     private static final Map<ServerPlayer, Long> LAST_RESYNC = new WeakHashMap<>();
 
@@ -67,6 +71,15 @@ public final class BlasterLogic {
      */
     public static boolean fire(LivingEntity shooter, ItemStack stack, Vec3 direction, float spreadDegrees,
                                int seed, int jitterTolerance, @Nullable Player soundExcluded) {
+        return fire(shooter, stack, direction, spreadDegrees, seed, jitterTolerance, soundExcluded, 1.0F);
+    }
+
+    /**
+     * @param chargeFactor charge entre 0 et 1 pour une arme en mode "charged" (ignorée sinon) :
+     *                     multiplie les dégâts et grossit le tir
+     */
+    public static boolean fire(LivingEntity shooter, ItemStack stack, Vec3 direction, float spreadDegrees,
+                               int seed, int jitterTolerance, @Nullable Player soundExcluded, float chargeFactor) {
         if (!(shooter.level() instanceof ServerLevel level) || !shooter.isAlive()) return false;
         WeaponDefinition def = BlasterItem.definition(false, stack).orElse(null);
         if (def == null) return false;
@@ -78,7 +91,7 @@ public final class BlasterLogic {
         if (magazine.isReloading(def, now) || magazine.roundsAt(def, now) <= 0) return false;
 
         for (Vec3 dir : shotDirections(direction, spreadDegrees, def.projectilesPerShot(), seed)) {
-            BoltEntity bolt = new BoltEntity(level, shooter, def);
+            BoltEntity bolt = new BoltEntity(level, shooter, def, chargeFactor);
             bolt.shoot(dir.x, dir.y, dir.z, def.boltSpeed(), 0);
             level.addFreshEntity(bolt);
         }
@@ -106,6 +119,11 @@ public final class BlasterLogic {
      * un problème, le serveur pourra imposer la suite de graines.
      */
     public static void tryFire(ServerPlayer player, boolean aiming, int seed) {
+        tryFire(player, aiming, seed, 0);
+    }
+
+    /** @param chargeTicks durée de charge annoncée par le client (mode "charged" uniquement) */
+    public static void tryFire(ServerPlayer player, boolean aiming, int seed, int chargeTicks) {
         if (player.isSpectator()) return;
         ItemStack stack = player.getMainHandItem();
         WeaponDefinition def = BlasterItem.definition(false, stack).orElse(null);
@@ -113,7 +131,8 @@ public final class BlasterLogic {
 
         float spread = aiming ? def.spread().aim() : def.spread().hip();
         // Le tireur a déjà vu et entendu son tir (prédiction client) : on l'exclut du son.
-        if (!fire(player, stack, player.getLookAngle(), spread, seed, SERVER_JITTER_TOLERANCE, player)) {
+        float charge = def.fireMode() == FireMode.CHARGED ? serverChargeFactor(player, def, chargeTicks) : 1.0F;
+        if (!fire(player, stack, player.getLookAngle(), spread, seed, SERVER_JITTER_TOLERANCE, player, charge)) {
             // Le client avait prédit ce tir : on lui renvoie l'état réel de l'arme (chaleur).
             resync(player, player.level().getGameTime());
         }
@@ -141,6 +160,25 @@ public final class BlasterLogic {
         shooter.level().playSound(soundExcluded, shooter.getX(), shooter.getEyeY(), shooter.getZ(),
                 SoundEvents.CROSSBOW_LOADING_START.value(), source, 0.9F, 0.8F);
         return true;
+    }
+
+    /** Début de charge d'un joueur (paquet {@code ChargePayload}) : le serveur mesure lui-même la durée. */
+    public static void startCharge(ServerPlayer player) {
+        WeaponDefinition def = BlasterItem.definition(false, player.getMainHandItem()).orElse(null);
+        if (def == null || def.fireMode() != FireMode.CHARGED) return;
+        CHARGE_START.put(player, player.level().getGameTime());
+    }
+
+    /**
+     * Charge effective d'un tir chargé : le minimum entre ce que le client annonce et ce que le
+     * serveur a mesuré depuis le début de charge (+ une petite marge réseau). Sans début de
+     * charge connu, le tir part à charge minimale.
+     */
+    private static float serverChargeFactor(ServerPlayer player, WeaponDefinition def, int claimedTicks) {
+        Long start = CHARGE_START.remove(player);
+        if (start == null) return 0;
+        long measured = player.level().getGameTime() - start + CHARGE_TOLERANCE_TICKS;
+        return def.firing().charge().factor((int) Math.max(0, Math.min(claimedTicks, measured)));
     }
 
     /** Rechargement demandé par un joueur (paquet {@code ReloadPayload}). */

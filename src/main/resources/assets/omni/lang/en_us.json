@@ -28,5 +28,8 @@
   "tooltip.omni.magazine": "Magazine: %s shots, reload %ss",
   "key.omni.reload": "Reload blaster",
   "key.categories.omni": "Omni",
-  "message.omni.no_ammo": "No ammunition left"
+  "message.omni.no_ammo": "No ammunition left",
+  "weapon.omni.burst_carbine": "Burst Carbine",
+  "tooltip.omni.fire_mode.burst": "Burst",
+  "tooltip.omni.fire_mode.charged": "Charged: hold to charge, release to fire"
 }

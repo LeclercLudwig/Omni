@@ -1,6 +1,7 @@
 package com.omni.client;
 
 import com.omni.entity.BoltEntity;
+import com.omni.entity.MuzzlePositions;
 import com.omni.registry.OmniComponents;
 import com.omni.weapon.BlasterItem;
 import com.omni.weapon.BlasterLogic;
@@ -8,12 +9,14 @@ import com.omni.network.ReloadPayload;
 import com.omni.weapon.BlasterState;
 import com.omni.weapon.MagazineState;
 import com.omni.weapon.WeaponDefinition;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.network.PacketDistributor;
@@ -36,10 +39,11 @@ public final class ClientPrediction {
     private ClientPrediction() {}
 
     public static void predictShot(LocalPlayer player, ClientLevel level, ItemStack stack, WeaponDefinition def,
-                                   boolean aiming, int seed) {
+                                   boolean aiming, int seed, float chargeFactor) {
         for (Vec3 direction : BlasterLogic.shotDirections(player.getLookAngle(), def, aiming, seed)) {
-            BoltEntity bolt = BoltEntity.predicted(level, player, def);
+            BoltEntity bolt = BoltEntity.predicted(level, player, def, chargeFactor);
             bolt.shoot(direction.x, direction.y, direction.z, def.boltSpeed(), 0);
+            bolt.setVisualStart(muzzle(player, def));
             bolt.setId(nextClientEntityId--);
             level.addEntity(bolt);
         }
@@ -85,5 +89,28 @@ public final class ClientPrediction {
         level.playLocalSound(player.getX(), player.getEyeY(), player.getZ(),
                 SoundEvents.CROSSBOW_LOADING_START.value(), SoundSource.PLAYERS, 0.9F, 0.8F, false);
         PacketDistributor.sendToServer(ReloadPayload.INSTANCE);
+    }
+
+    /**
+     * Position monde du canon tel qu'il apparaît à l'écran.
+     * <p>
+     * En 1re personne, l'arme est dessinée dans un repère « main » (champ de vision fixe de 70°)
+     * à environ (0,56 ; -0,40 ; 1,4) de la caméra, ramené au centre quand on vise (voir
+     * BlasterClientExtensions). Pour que le tir apparaisse au même endroit de l'écran alors que le
+     * monde utilise le champ de vision du joueur (et le zoom de visée), on corrige les décalages
+     * latéraux par le rapport des tangentes.
+     */
+    private static Vec3 muzzle(LocalPlayer player, WeaponDefinition def) {
+        Minecraft mc = Minecraft.getInstance();
+        if (!mc.options.getCameraType().isFirstPerson()) return MuzzlePositions.thirdPerson(player);
+
+        float aim = ClientWeaponControls.aimProgress(1.0F);
+        double worldFov = mc.options.fov().get() * Mth.lerp(aim, 1.0F, def.aimFovMultiplier());
+        double k = Math.tan(Math.toRadians(worldFov) / 2) / Math.tan(Math.toRadians(70) / 2);
+
+        double right = Mth.lerp(aim, 0.56, 0.0) * k;
+        double up = Mth.lerp(aim, -0.40, -0.28) * k;
+        double forward = Mth.lerp(aim, 1.4, 1.33);
+        return MuzzlePositions.frame(player).at(player.getEyePosition(), forward, right, up);
     }
 }

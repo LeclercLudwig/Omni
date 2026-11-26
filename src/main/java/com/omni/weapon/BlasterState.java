@@ -18,9 +18,17 @@ import net.minecraft.network.codec.StreamCodec;
  * @param overheated verrouillé jusqu'à refroidissement complet
  * @param lastShot   gameTime du dernier tir, -1 si jamais tiré
  * @param nextShot   gameTime à partir duquel le prochain tir est autorisé, -1 si aucun
+ * @param burstShots tirs déjà partis dans la rafale en cours (mode burst), 0 hors rafale
  */
-public record BlasterState(float heat, long lastUpdate, boolean overheated, long lastShot, long nextShot) {
-    public static final BlasterState EMPTY = new BlasterState(0, 0, false, -1, -1);
+public record BlasterState(float heat, long lastUpdate, boolean overheated, long lastShot, long nextShot, int burstShots) {
+    public static final BlasterState EMPTY = new BlasterState(0, 0, false, -1, -1, 0);
+
+    /** Marge (ticks) au-delà de laquelle une rafale interrompue est considérée terminée. */
+    private static final int BURST_GRACE_TICKS = 2;
+
+    public BlasterState(float heat, long lastUpdate, boolean overheated, long lastShot, long nextShot) {
+        this(heat, lastUpdate, overheated, lastShot, nextShot, 0);
+    }
 
     /**
      * Écart d'horloge au-delà duquel on considère que l'item vient d'un autre monde ou
@@ -34,7 +42,8 @@ public record BlasterState(float heat, long lastUpdate, boolean overheated, long
             Codec.LONG.fieldOf("last_update").forGetter(BlasterState::lastUpdate),
             Codec.BOOL.fieldOf("overheated").forGetter(BlasterState::overheated),
             Codec.LONG.fieldOf("last_shot").forGetter(BlasterState::lastShot),
-            Codec.LONG.optionalFieldOf("next_shot", -1L).forGetter(BlasterState::nextShot)
+            Codec.LONG.optionalFieldOf("next_shot", -1L).forGetter(BlasterState::nextShot),
+            Codec.INT.optionalFieldOf("burst_shots", 0).forGetter(BlasterState::burstShots)
     ).apply(i, BlasterState::new));
 
     public static final StreamCodec<ByteBuf, BlasterState> STREAM_CODEC = StreamCodec.composite(
@@ -43,6 +52,7 @@ public record BlasterState(float heat, long lastUpdate, boolean overheated, long
             ByteBufCodecs.BOOL, BlasterState::overheated,
             ByteBufCodecs.VAR_LONG, BlasterState::lastShot,
             ByteBufCodecs.VAR_LONG, BlasterState::nextShot,
+            ByteBufCodecs.VAR_INT, BlasterState::burstShots,
             BlasterState::new);
 
     public float heatAt(WeaponDefinition def, long now) {
@@ -75,6 +85,20 @@ public record BlasterState(float heat, long lastUpdate, boolean overheated, long
         // un tir accepté en avance ne fait pas gagner de cadence sur la durée.
         long base = nextShot < 0 || nextShot - now > def.fireDelayTicks() + CLOCK_RESET_TICKS
                 ? now : Math.max(now, nextShot);
-        return new BlasterState(Math.min(newHeat, def.heat().max()), now, overheat, now, base + def.fireDelayTicks());
+
+        // Rafale : intervalle court entre les tirs d'une même rafale, fire_delay_ticks après le dernier.
+        long delay = def.fireDelayTicks();
+        int shotsInBurst = 0;
+        if (def.fireMode() == FireMode.BURST) {
+            FiringSettings.Burst burst = def.firing().burst();
+            boolean continuing = burstShots > 0 && lastShot >= 0 && now - lastShot <= burst.intervalTicks() + BURST_GRACE_TICKS;
+            shotsInBurst = continuing ? burstShots + 1 : 1;
+            if (shotsInBurst >= burst.count()) {
+                shotsInBurst = 0;
+            } else {
+                delay = burst.intervalTicks();
+            }
+        }
+        return new BlasterState(Math.min(newHeat, def.heat().max()), now, overheat, now, base + delay, shotsInBurst);
     }
 }

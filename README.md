@@ -23,8 +23,19 @@ Java 21 est téléchargé automatiquement par Gradle si besoin. En jeu : onglet 
 ./gradlew runGameTestServer
 ```
 
-32 GameTests (`gametest/`) vérifient la cadence, la dispersion, la surchauffe, les dégâts,
-les headshots, les effets stun/ion, la prédiction, les munitions, le comportement des soldats et la parade. Ils tournent aussi sur GitHub Actions à chaque push.
+38 GameTests (`gametest/`) vérifient la cadence, la dispersion, la surchauffe, les dégâts,
+les headshots, les effets stun/ion, la prédiction, les munitions, les modes rafale et chargé, le comportement des soldats et la parade. Ils tournent aussi sur GitHub Actions à chaque push.
+
+## Modes de tir
+
+| Mode | Comportement | Exemple |
+|---|---|---|
+| `semi` | un tir par clic | pistolet blaster |
+| `auto` | tire tant que le bouton est maintenu | fusil blaster, répéteur lourd |
+| `burst` | un clic = une rafale (bloc `"burst"` : `count`, `interval_ticks`), puis `fire_delay_ticks` | carabine à rafales |
+| `charged` | maintenir pour charger, relâcher pour tirer ; dégâts ×`min_multiplier` → ×`max_multiplier` en `ticks` (bloc `"charge"`), tir plus épais, jauge au-dessus du réticule | fusil de précision |
+
+La durée de charge est mesurée par le serveur (le client ne peut pas annoncer une charge qu'il n'a pas faite).
 
 ## Munitions
 
@@ -67,7 +78,7 @@ Seul `damage` est obligatoire (les commentaires ci-dessous sont explicatifs, à 
 
 ```jsonc
 {
-  "fire_mode": "auto",              // "semi" | "auto"
+  "fire_mode": "auto",              // "semi" | "auto" | "burst" | "charged"
   "bolt_type": "standard",          // "standard" | "stun" | "ion"
   "damage": 5.0,
   "bolt_speed": 3.0,                // blocs/tick, 3.9 max
@@ -107,7 +118,6 @@ Le serveur fait autorité : le client ne fait qu'envoyer « je tire » et pré-f
 
 - Prédiction client : afficher le tir immédiatement côté tireur, avant la réponse du serveur
 - Recul lissé sur plusieurs frames au lieu d'un à-coup instantané
-- Modes `burst` et `charged` (tir chargé du sniper)
 - Refroidissement actif (QTE)
 - Vrais sons (`sounds.json` + `.ogg`) et modèles Blockbench
 

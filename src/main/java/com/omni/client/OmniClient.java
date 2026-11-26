@@ -20,6 +20,8 @@ public class OmniClient {
         modBus.addListener(OmniClient::registerGuiLayers);
         modBus.addListener(OmniClient::registerClientExtensions);
         modBus.addListener(OmniKeys::register);
+        modBus.addListener(WeaponModels::registerAdditional);
+        modBus.addListener(WeaponModels::modifyBakingResult);
 
         NeoForge.EVENT_BUS.addListener(ClientWeaponControls::onInteractionKey);
         NeoForge.EVENT_BUS.addListener(ClientWeaponControls::onClientTick);

@@ -28,5 +28,8 @@
   "tooltip.omni.magazine": "Chargeur : %s tirs, rechargement %s s",
   "key.omni.reload": "Recharger le blaster",
   "key.categories.omni": "Omni",
-  "message.omni.no_ammo": "Plus de munitions"
+  "message.omni.no_ammo": "Plus de munitions",
+  "weapon.omni.burst_carbine": "Carabine à rafales",
+  "tooltip.omni.fire_mode.burst": "Rafale",
+  "tooltip.omni.fire_mode.charged": "Chargé : maintenir pour charger, relâcher pour tirer"
 }

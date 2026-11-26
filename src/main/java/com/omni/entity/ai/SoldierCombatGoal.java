@@ -180,12 +180,14 @@ public class SoldierCombatGoal extends Goal {
         }
 
         if (burstShotsLeft <= 0) {
-            burstShotsLeft = def.fireMode() == FireMode.AUTO
-                    ? 3 + soldier.getRandom().nextInt(4)
-                    : 1 + soldier.getRandom().nextInt(3);
+            burstShotsLeft = switch (def.fireMode()) {
+                case AUTO -> 3 + soldier.getRandom().nextInt(4);
+                case BURST -> def.firing().burst().count() * (1 + soldier.getRandom().nextInt(2));
+                default -> 1 + soldier.getRandom().nextInt(3);
+            };
         }
 
-        Vec3 from = new Vec3(soldier.getX(), soldier.getEyeY() - 0.1, soldier.getZ());
+        Vec3 from = soldier.getEyePosition();
         Vec3 aimPoint = target.position().add(0, target.getBbHeight() * 0.55, 0);
         float spread = (def.spread().hip() + npcInaccuracy());
         boolean fired = BlasterLogic.fire(soldier, soldier.weapon(), aimPoint.subtract(from), spread,

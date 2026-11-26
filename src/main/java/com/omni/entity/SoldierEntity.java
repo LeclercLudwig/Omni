@@ -75,7 +75,10 @@ public class SoldierEntity extends Monster {
         SpawnGroupData data = super.finalizeSpawn(level, difficulty, spawnType, groupData);
         if (getMainHandItem().isEmpty()) {
             float roll = random.nextFloat();
-            String weapon = roll < 0.5F ? "blaster_rifle" : roll < 0.85F ? "blaster_pistol" : "heavy_repeater";
+            String weapon = roll < 0.4F ? "blaster_rifle"
+                    : roll < 0.7F ? "blaster_pistol"
+                    : roll < 0.9F ? "burst_carbine"
+                    : "heavy_repeater";
             setItemSlot(EquipmentSlot.MAINHAND, BlasterItem.create(Omni.id(weapon)));
         }
         return data;

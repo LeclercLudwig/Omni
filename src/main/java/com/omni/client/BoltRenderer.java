@@ -45,24 +45,28 @@ public class BoltRenderer extends EntityRenderer<BoltEntity> {
     @Override
     public void render(BoltEntity bolt, float entityYaw, float partialTick, PoseStack pose,
                        MultiBufferSource buffers, int packedLight) {
-        Vec3 velocity = bolt.getDeltaMovement();
+        Vec3 velocity = bolt.visualDirection(partialTick);
         if (velocity.lengthSqr() < 1.0E-6) return;
 
         pose.pushPose();
+        // Départ visuel au canon de l'arme, qui rejoint la vraie trajectoire en quelques ticks.
+        Vec3 offset = bolt.visualOffset(partialTick);
+        pose.translate(offset.x, offset.y, offset.z);
         float yaw = (float) Math.atan2(velocity.x, velocity.z);
         float pitch = (float) Math.atan2(velocity.y, velocity.horizontalDistance());
         pose.mulPose(Axis.YP.rotation(yaw));
         pose.mulPose(Axis.XP.rotation(-pitch));
 
         // Le trait part de la tête du tir (z = 0) vers l'arrière (z négatif).
-        float length = Math.min(LENGTH, (float) velocity.length() * Math.min(bolt.tickCount + partialTick, 1.0F) + 0.2F);
+        float length = Math.min(LENGTH, (float) bolt.getDeltaMovement().length() * Math.min(bolt.tickCount + partialTick, 1.0F) + 0.2F);
         int color = bolt.getColor();
         int r = color >> 16 & 0xFF, g = color >> 8 & 0xFF, b = color & 0xFF;
 
         VertexConsumer consumer = buffers.getBuffer(RenderType.lightning());
         Matrix4f matrix = pose.last().pose();
-        box(consumer, matrix, GLOW_HALF_WIDTH, length, r, g, b, 120);
-        box(consumer, matrix, CORE_HALF_WIDTH, length * 0.95F, 255, 255, 255, 220);
+        float scale = bolt.getScale();
+        box(consumer, matrix, GLOW_HALF_WIDTH * scale, length, r, g, b, 120);
+        box(consumer, matrix, CORE_HALF_WIDTH * scale, length * 0.95F, 255, 255, 255, 220);
 
         pose.popPose();
         super.render(bolt, entityYaw, partialTick, pose, buffers, packedLight);

@@ -59,7 +59,7 @@ public class DeflectionGameTests {
 
     /** Tir précis du soldat vers le torse du défenseur. */
     private static void fireAt(SoldierEntity soldier, ServerPlayer target) {
-        Vec3 from = new Vec3(soldier.getX(), soldier.getEyeY() - 0.1, soldier.getZ());
+        Vec3 from = soldier.getEyePosition();
         Vec3 to = target.position().add(0, 1.2, 0);
         BlasterLogic.fire(soldier, soldier.weapon(), to.subtract(from), 0, 7, 0, null);
     }
@@ -149,7 +149,7 @@ public class DeflectionGameTests {
         SoldierEntity soldier = shooter(helper, false);
 
         helper.runAfterDelay(20, () -> {
-            Vec3 from = new Vec3(soldier.getX(), soldier.getEyeY() - 0.1, soldier.getZ());
+            Vec3 from = soldier.getEyePosition();
             BlasterLogic.fire(soldier, soldier.weapon(), defender.position().add(0, 1.2, 0).subtract(from), 0, 7, 0, null);
         });
         helper.succeedWhen(() -> {

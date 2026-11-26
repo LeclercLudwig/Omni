@@ -1,0 +1,15 @@
+{
+  "fire_mode": "burst",
+  "burst": { "count": 3, "interval_ticks": 2 },
+  "damage": 5.0,
+  "bolt_speed": 3.0,
+  "range": 80,
+  "fire_delay_ticks": 10,
+  "spread": { "hip": 3.0, "aim": 0.8 },
+  "recoil": { "pitch": 1.4, "yaw_jitter": 0.4 },
+  "heat": { "per_shot": 6, "max": 100, "cooling_per_tick": 1.4 },
+  "aim_fov_multiplier": 0.75,
+  "bolt_color": "#FF4A2A",
+  "fire_sound": "minecraft:entity.firework_rocket.blast",
+  "magazine": { "capacity": 24, "reload_ticks": 40 }
+}

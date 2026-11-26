@@ -1,9 +1,11 @@
 package com.omni.client;
 
+import com.omni.network.ChargePayload;
 import com.omni.network.FirePayload;
 import com.omni.weapon.BlasterItem;
 import com.omni.weapon.BlasterState;
 import com.omni.weapon.FireMode;
+import com.omni.weapon.FiringSettings;
 import com.omni.weapon.MagazineState;
 import com.omni.weapon.WeaponDefinition;
 import net.minecraft.client.Minecraft;
@@ -33,7 +35,6 @@ public final class ClientWeaponControls {
     private static float aimProgress;
     private static float aimProgressO;
     private static boolean attackWasDown;
-    private static long lastLocalShot = Long.MIN_VALUE / 2;
 
     private ClientWeaponControls() {}
 
@@ -63,7 +64,9 @@ public final class ClientWeaponControls {
         if (player == null || mc.level == null) {
             aimProgress = 0;
             attackWasDown = false;
-            lastLocalShot = Long.MIN_VALUE / 2;
+            localNextShot = Long.MIN_VALUE / 2;
+            burstActive = false;
+            cancelCharge();
             return;
         }
 
@@ -84,31 +87,138 @@ public final class ClientWeaponControls {
         boolean attackDown = canAct && mc.options.keyAttack.isDown();
         boolean justPressed = attackDown && !attackWasDown;
         attackWasDown = attackDown;
-        if (!attackDown) return;
 
-        WeaponDefinition def = held.get();
-        if (def.fireMode() == FireMode.SEMI && !justPressed) return;
-
-        // Chargeur : pas de tir pendant un rechargement ; vide → rechargement automatique.
-        MagazineState magazine = BlasterItem.magazine(stack);
-        if (magazine.isReloading(def, now)) return;
-        if (magazine.roundsAt(def, now) <= 0) {
-            ClientPrediction.requestReload(player, mc.level, stack, def, justPressed);
+        if (!canAct) {
+            cancelCharge();
+            burstActive = false;
             return;
         }
+        WeaponDefinition def = held.get();
+        if (charging && def.fireMode() != FireMode.CHARGED) cancelCharge(); // arme changée en pleine charge
 
+        switch (def.fireMode()) {
+            case SEMI -> {
+                if (justPressed) tryShot(player, mc, stack, def, aiming, now, true);
+            }
+            case AUTO -> {
+                if (attackDown) tryShot(player, mc, stack, def, aiming, now, justPressed);
+            }
+            case BURST -> {
+                // Un clic lance la rafale ; elle continue seule, même bouton relâché.
+                // Décompte local (et non l'état synchronisé, exprimé en temps serveur).
+                if (justPressed && !burstActive) {
+                    burstFired = 0;
+                    burstActive = true;
+                }
+                if (burstActive) {
+                    Shot shot = tryShot(player, mc, stack, def, aiming, now, burstFired == 0);
+                    if (shot == Shot.BLOCKED || shot == Shot.FIRED && burstFired >= def.firing().burst().count()) {
+                        burstActive = false;
+                    }
+                }
+            }
+            case CHARGED -> tickCharge(player, mc, stack, def, aiming, now, attackDown, justPressed);
+        }
+    }
+
+    // --- Tir ---------------------------------------------------------------------------------
+
+    private enum Shot { FIRED, WAIT, BLOCKED }
+
+    private static boolean burstActive;
+    private static int burstFired;
+    private static long localNextShot = Long.MIN_VALUE / 2;
+
+    /**
+     * Vérifie que l'arme peut tirer (chargeur, rechargement, surchauffe).
+     * Chargeur vide → lance le rechargement (avec retour « plus de munitions » si {@code feedback}).
+     */
+    private static boolean weaponReady(LocalPlayer player, Minecraft mc, ItemStack stack, WeaponDefinition def,
+                                       long now, boolean feedback) {
+        MagazineState magazine = BlasterItem.magazine(stack);
+        if (magazine.isReloading(def, now)) return false;
+        if (magazine.roundsAt(def, now) <= 0) {
+            ClientPrediction.requestReload(player, mc.level, stack, def, feedback);
+            return false;
+        }
+        return !BlasterItem.state(stack).overheatedAt(def, now);
+    }
+
+    private static Shot tryShot(LocalPlayer player, Minecraft mc, ItemStack stack, WeaponDefinition def,
+                                boolean aiming, long now, boolean feedback) {
         // Pré-filtrage local (le serveur revérifie tout) : évite de spammer des paquets
         // et de déclencher le recul pour des tirs qui seraient refusés.
-        BlasterState state = BlasterItem.state(stack);
-        if (state.overheatedAt(def, now)) return;
-        if (now >= lastLocalShot && now - lastLocalShot < def.fireDelayTicks()) return;
-        lastLocalShot = now;
+        if (!weaponReady(player, mc, stack, def, now, feedback)) return Shot.BLOCKED;
+        if (now < localNextShot && localNextShot - now < 1200) return Shot.WAIT;
+        fireNow(player, mc, stack, def, aiming, now, 0, 1.0F);
+        return Shot.FIRED;
+    }
 
+    private static void fireNow(LocalPlayer player, Minecraft mc, ItemStack stack, WeaponDefinition def,
+                                boolean aiming, long now, int chargeTicks, float chargeFactor) {
         // Même graine des deux côtés : le tir prédit suit exactement la trajectoire du vrai.
         int seed = RANDOM.nextInt();
-        PacketDistributor.sendToServer(new FirePayload(aiming, seed));
-        ClientPrediction.predictShot(player, mc.level, stack, def, aiming, seed);
-        applyRecoil(def, aiming);
+        PacketDistributor.sendToServer(new FirePayload(aiming, seed, chargeTicks));
+        ClientPrediction.predictShot(player, mc.level, stack, def, aiming, seed, chargeFactor);
+        // Prochaine échéance, calculée en temps client : intervalle court au sein d'une rafale.
+        long delay = def.fireDelayTicks();
+        if (def.fireMode() == FireMode.BURST && ++burstFired < def.firing().burst().count()) {
+            delay = def.firing().burst().intervalTicks();
+        }
+        localNextShot = now + delay;
+        float recoilFactor = def.fireMode() == FireMode.CHARGED ? 0.5F + chargeFactor : 1.0F;
+        applyRecoil(def, aiming, recoilFactor);
+    }
+
+    // --- Tir chargé --------------------------------------------------------------------------
+
+    private static boolean charging;
+    private static long chargeStart;
+    private static boolean fullChargeCuePlayed;
+
+    public static boolean isCharging() {
+        return charging;
+    }
+
+    /** Charge entre 0 et 1 de l'arme en main (0 si on ne charge pas). */
+    public static float chargeProgress(float partialTick) {
+        Minecraft mc = Minecraft.getInstance();
+        if (!charging || mc.level == null) return 0;
+        return heldDefinition().map(def -> Math.min(1F,
+                (mc.level.getGameTime() - chargeStart + partialTick) / def.firing().charge().ticks())).orElse(0F);
+    }
+
+    private static void tickCharge(LocalPlayer player, Minecraft mc, ItemStack stack, WeaponDefinition def,
+                                   boolean aiming, long now, boolean attackDown, boolean justPressed) {
+        if (justPressed && !charging) {
+            if (!weaponReady(player, mc, stack, def, now, true)) return;
+            if (now < localNextShot && localNextShot - now < 1200) return;
+            charging = true;
+            chargeStart = now;
+            fullChargeCuePlayed = false;
+            PacketDistributor.sendToServer(ChargePayload.INSTANCE); // le serveur mesure la durée lui-même
+            player.level().playLocalSound(player.getX(), player.getEyeY(), player.getZ(),
+                    SoundEvents.BEACON_ACTIVATE, SoundSource.PLAYERS, 0.35F, 1.6F, false);
+        }
+        if (!charging) return;
+
+        int heldTicks = (int) (now - chargeStart);
+        FiringSettings.Charge charge = def.firing().charge();
+        if (!fullChargeCuePlayed && heldTicks >= charge.ticks()) {
+            fullChargeCuePlayed = true;
+            player.level().playLocalSound(player.getX(), player.getEyeY(), player.getZ(),
+                    SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.PLAYERS, 1.0F, 1.8F, false);
+        }
+        if (!attackDown) { // relâché : le tir part
+            charging = false;
+            if (weaponReady(player, mc, stack, def, now, false)) {
+                fireNow(player, mc, stack, def, aiming, now, heldTicks, charge.factor(heldTicks));
+            }
+        }
+    }
+
+    private static void cancelCharge() {
+        charging = false;
     }
 
     private static boolean wasReloading;
@@ -123,8 +233,8 @@ public final class ClientWeaponControls {
         wasReloading = reloading;
     }
 
-    private static void applyRecoil(WeaponDefinition def, boolean aiming) {
-        float factor = aiming ? 0.5F : 1.0F;
+    private static void applyRecoil(WeaponDefinition def, boolean aiming, float multiplier) {
+        float factor = (aiming ? 0.5F : 1.0F) * multiplier;
         float pitch = def.recoil().pitch() * factor;
         float yaw = (RANDOM.nextFloat() * 2 - 1) * def.recoil().yawJitter() * factor;
         RecoilController.kick(pitch, yaw);
@@ -133,10 +243,13 @@ public final class ClientWeaponControls {
     /** Zoom en visée (seulement le FOV du monde, pas celui de la main). */
     static void onComputeFov(ViewportEvent.ComputeFov event) {
         if (!event.usedConfiguredFov()) return;
-        float progress = aimProgress((float) event.getPartialTick());
-        if (progress <= 0) return;
-        heldDefinition().ifPresent(def ->
-                event.setFOV(event.getFOV() * Mth.lerp(progress, 1.0F, def.aimFovMultiplier())));
+        float partial = (float) event.getPartialTick();
+        float progress = aimProgress(partial);
+        float charge = chargeProgress(partial);
+        if (progress <= 0 && charge <= 0) return;
+        heldDefinition().ifPresent(def -> event.setFOV(event.getFOV()
+                * Mth.lerp(progress, 1.0F, def.aimFovMultiplier())
+                * Mth.lerp(charge, 1.0F, 0.9F))); // la charge resserre légèrement la vue
     }
 
     /** Sensibilité réduite proportionnellement au zoom (indispensable pour la lunette). */

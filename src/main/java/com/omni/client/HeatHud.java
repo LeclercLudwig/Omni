@@ -33,7 +33,9 @@ public final class HeatHud {
         }
 
         BlasterItem.definition(true, stack).ifPresent(def -> {
-            renderAmmo(graphics, mc, stack, def, now, delta.getGameTimeDeltaPartialTick(false));
+            float partialTick = delta.getGameTimeDeltaPartialTick(false);
+            renderAmmo(graphics, mc, stack, def, now, partialTick);
+            renderCharge(graphics, now, partialTick);
 
             BlasterState state = BlasterItem.state(stack);
             float ratio = state.heatAt(def, now) / def.heat().max();
@@ -67,6 +69,17 @@ public final class HeatHud {
         if (!mc.player.hasInfiniteMaterials()) text += "  ×" + BlasterLogic.countAmmo(mc.player, magazine);
         int color = rounds == 0 ? 0xFFFF5050 : rounds <= magazine.capacity() / 4 ? 0xFFFFB040 : 0xFFE8E8E8;
         graphics.drawString(mc.font, text, graphics.guiWidth() / 2 - mc.font.width(text) / 2, y, color, true);
+    }
+
+    /** Charge du tir (mode "charged") au-dessus du réticule ; clignote quand elle est pleine. */
+    private static void renderCharge(GuiGraphics graphics, long now, float partialTick) {
+        if (!ClientWeaponControls.isCharging()) return;
+        float charge = ClientWeaponControls.chargeProgress(partialTick);
+        int x = graphics.guiWidth() / 2 - WIDTH / 2;
+        int y = graphics.guiHeight() / 2 - 14;
+        int color = charge >= 1 ? (now / 3 % 2 == 0 ? 0xFFFFFFFF : 0xFF9FE8FF) : FastColor.ARGB32.lerp(charge, 0xFF5FA8FF, 0xFF9FE8FF);
+        graphics.fill(x - 1, y - 1, x + WIDTH + 1, y + HEIGHT + 1, 0x90000000);
+        graphics.fill(x, y, x + Math.round(WIDTH * charge), y + HEIGHT, color);
     }
 
     private static void renderGuard(GuiGraphics graphics, GuardState guard, long now) {

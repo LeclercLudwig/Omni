@@ -10,7 +10,7 @@ import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.HumanoidMobRenderer;
 import net.minecraft.resources.ResourceLocation;
 
-/** Modèle humanoïde (maillage joueur) ; arme épaulée à deux mains quand il combat. */
+/** Modèle humanoïde (maillage joueur) ; arme épaulée au combat, portée canon vers le sol au repos. */
 public class SoldierRenderer extends HumanoidMobRenderer<SoldierEntity, HumanoidModel<SoldierEntity>> {
     private static final ResourceLocation TEXTURE = Omni.id("textures/entity/soldier.png");
 
@@ -22,7 +22,7 @@ public class SoldierRenderer extends HumanoidMobRenderer<SoldierEntity, Humanoid
     public void render(SoldierEntity soldier, float entityYaw, float partialTick, PoseStack pose,
                        MultiBufferSource buffers, int packedLight) {
         HumanoidModel<SoldierEntity> model = getModel();
-        model.rightArmPose = soldier.isAggressive() ? HumanoidModel.ArmPose.BOW_AND_ARROW : HumanoidModel.ArmPose.ITEM;
+        model.rightArmPose = soldier.isAggressive() ? HumanoidModel.ArmPose.CROSSBOW_HOLD : HumanoidModel.ArmPose.ITEM;
         model.leftArmPose = HumanoidModel.ArmPose.EMPTY;
         super.render(soldier, entityYaw, partialTick, pose, buffers, packedLight);
     }

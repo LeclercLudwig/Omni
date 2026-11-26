@@ -4,6 +4,7 @@ import com.omni.registry.OmniEntities;
 import com.omni.registry.OmniTags;
 import com.omni.weapon.BladeDeflection;
 import com.omni.weapon.BoltType;
+import com.omni.weapon.FireMode;
 import com.omni.weapon.WeaponDefinition;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.core.particles.ParticleTypes;
@@ -42,6 +43,9 @@ public class BoltEntity extends Projectile {
     /** Synchronisé : le propriétaire, lui, n'est envoyé au client qu'à l'apparition du tir. */
     private static final EntityDataAccessor<Boolean> DEFLECTED =
             SynchedEntityData.defineId(BoltEntity.class, EntityDataSerializers.BOOLEAN);
+    /** Épaisseur du rendu (1 = normal ; jusqu'à 2 pour un tir chargé à fond). */
+    private static final EntityDataAccessor<Float> SCALE =
+            SynchedEntityData.defineId(BoltEntity.class, EntityDataSerializers.FLOAT);
 
     private float damage = 5.0F;
     private float headshotMultiplier = 1.5F;
@@ -50,27 +54,46 @@ public class BoltEntity extends Projectile {
     /** Copie locale créée par le client du tireur pour afficher le tir sans attendre le serveur. */
     private boolean predicted;
 
+    /** Ticks pendant lesquels le rendu rejoint la vraie trajectoire (environ 8 à 12 blocs). */
+    private static final float VISUAL_CONVERGENCE_TICKS = 4;
+    /**
+     * Client uniquement : décalage d'affichage au départ du tir (canon de l'arme − position réelle).
+     * Le tir physique part de l'œil pour viser exactement au réticule ; seul son rendu démarre
+     * au canon, puis le décalage s'estompe en {@link #VISUAL_CONVERGENCE_TICKS} ticks.
+     */
+    private Vec3 visualOffset = Vec3.ZERO;
+    private boolean visualOffsetInitialized;
+
     public BoltEntity(EntityType<? extends BoltEntity> type, Level level) {
         super(type, level);
     }
 
     public BoltEntity(Level level, LivingEntity shooter, WeaponDefinition def) {
+        this(level, shooter, def, 1.0F);
+    }
+
+    /** @param chargeFactor charge entre 0 et 1 (armes en mode "charged" uniquement) */
+    public BoltEntity(Level level, LivingEntity shooter, WeaponDefinition def, float chargeFactor) {
         this(OmniEntities.BOLT.get(), level);
         setOwner(shooter);
-        setPos(shooter.getX(), shooter.getEyeY() - 0.1, shooter.getZ());
+        setPos(shooter.getX(), shooter.getEyeY(), shooter.getZ()); // exactement l'œil : le tir va au réticule
         this.damage = def.damage();
         this.headshotMultiplier = def.headshotMultiplier();
         this.boltType = def.boltType();
         this.maxLifeTicks = Mth.ceil(def.range() / def.boltSpeed());
         this.entityData.set(COLOR, def.boltColor());
+        if (def.fireMode() == FireMode.CHARGED) {
+            this.damage *= def.firing().charge().damageMultiplier(chargeFactor);
+            this.entityData.set(SCALE, 1.0F + chargeFactor);
+        }
     }
 
     /**
      * Tir prédit : n'existe que dans le monde client du tireur, n'inflige aucun dégât
      * (c'est le tir du serveur qui compte) et disparaît à l'impact comme le vrai.
      */
-    public static BoltEntity predicted(Level clientLevel, LivingEntity shooter, WeaponDefinition def) {
-        BoltEntity bolt = new BoltEntity(clientLevel, shooter, def);
+    public static BoltEntity predicted(Level clientLevel, LivingEntity shooter, WeaponDefinition def, float chargeFactor) {
+        BoltEntity bolt = new BoltEntity(clientLevel, shooter, def, chargeFactor);
         bolt.predicted = true;
         return bolt;
     }
@@ -83,10 +106,33 @@ public class BoltEntity extends Projectile {
     protected void defineSynchedData(SynchedEntityData.Builder builder) {
         builder.define(COLOR, 0xFF3B30);
         builder.define(DEFLECTED, false);
+        builder.define(SCALE, 1.0F);
     }
 
     public int getColor() {
         return entityData.get(COLOR);
+    }
+
+    /** Fixe le point de départ visuel (canon) du tir ; à appeler juste après sa création côté client. */
+    public void setVisualStart(Vec3 muzzle) {
+        visualOffset = muzzle.subtract(position());
+        visualOffsetInitialized = true;
+    }
+
+    /** Décalage d'affichage à l'instant {@code partialTick} (zéro une fois la trajectoire rejointe). */
+    public Vec3 visualOffset(float partialTick) {
+        float fade = 1 - (tickCount + partialTick) / VISUAL_CONVERGENCE_TICKS;
+        return fade <= 0 ? Vec3.ZERO : visualOffset.scale(fade);
+    }
+
+    /** Direction affichée : la vitesse, corrigée tant que le rendu converge vers la vraie trajectoire. */
+    public Vec3 visualDirection(float partialTick) {
+        boolean converging = tickCount + partialTick < VISUAL_CONVERGENCE_TICKS;
+        return converging ? getDeltaMovement().subtract(visualOffset.scale(1 / VISUAL_CONVERGENCE_TICKS)) : getDeltaMovement();
+    }
+
+    public float getScale() {
+        return entityData.get(SCALE);
     }
 
     public boolean isDeflected() {
@@ -110,6 +156,14 @@ public class BoltEntity extends Projectile {
     @Override
     public void tick() {
         super.tick(); // gère "a quitté le tireur" (pour ne pas se toucher soi-même)
+
+        // Tirs des autres (joueurs, soldats) : le rendu part du canon de leur arme.
+        if (level().isClientSide && !visualOffsetInitialized) {
+            visualOffsetInitialized = true;
+            if (!predicted && !isDeflected() && getOwner() instanceof LivingEntity owner && owner.distanceToSqr(this) < 64) {
+                visualOffset = MuzzlePositions.thirdPerson(owner).subtract(position());
+            }
+        }
 
         if ((!level().isClientSide || predicted) && tickCount > maxLifeTicks) {
             discard();
