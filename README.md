@@ -66,3 +66,7 @@ Le serveur fait autorité : le client ne fait qu'envoyer « je tire » et pré-f
 - Cartouches de gaz (munitions) et refroidissement actif (QTE)
 - Vrais sons (`sounds.json` + `.ogg`) et modèles Blockbench
 - Déviation au sabre via `ProjectileDeflection` (déjà géré dans `BoltEntity#tick`)
+
+## Licence
+
+MIT — voir [LICENSE](LICENSE).
