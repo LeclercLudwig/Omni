@@ -1,5 +1,7 @@
 # Omni — blasters pour NeoForge 1.21.1
 
+[![Build et GameTests](https://github.com/LeclercLudwig/Omni/actions/workflows/build.yml/badge.svg)](https://github.com/LeclercLudwig/Omni/actions/workflows/build.yml)
+
 Squelette d'un système d'armes à énergie piloté par données : projectiles visibles,
 types de tirs, surchauffe, visée avec zoom, recul et dispersion.
 
@@ -14,6 +16,15 @@ Java 21 est téléchargé automatiquement par Gradle si besoin. En jeu : onglet 
 - **Clic gauche** : tirer (maintenu pour les armes `auto`)
 - **Clic droit maintenu** : viser (zoom, dispersion et recul réduits, sensibilité réduite)
 - La jauge sous le réticule montre la chaleur ; en surchauffe l'arme est bloquée jusqu'à refroidissement complet.
+
+## Tests
+
+```bash
+./gradlew runGameTestServer
+```
+
+10 GameTests (`gametest/BlasterGameTests`) vérifient la cadence, la dispersion, la surchauffe,
+les dégâts, les headshots et les effets stun/ion. Ils tournent aussi sur GitHub Actions à chaque push.
 
 ## Ajouter une arme
 
