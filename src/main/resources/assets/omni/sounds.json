@@ -1,0 +1,162 @@
+{
+  "weapon.blaster_pistol.fire": {
+    "subtitle": "subtitles.omni.weapon.fire",
+    "sounds": [
+      {
+        "name": "omni:weapon/blaster_pistol_fire"
+      }
+    ]
+  },
+  "weapon.blaster_rifle.fire": {
+    "subtitle": "subtitles.omni.weapon.fire",
+    "sounds": [
+      {
+        "name": "omni:weapon/blaster_rifle_fire"
+      }
+    ]
+  },
+  "weapon.burst_carbine.fire": {
+    "subtitle": "subtitles.omni.weapon.fire",
+    "sounds": [
+      {
+        "name": "omni:weapon/burst_carbine_fire"
+      }
+    ]
+  },
+  "weapon.heavy_repeater.fire": {
+    "subtitle": "subtitles.omni.weapon.fire",
+    "sounds": [
+      {
+        "name": "omni:weapon/heavy_repeater_fire"
+      }
+    ]
+  },
+  "weapon.scatter_blaster.fire": {
+    "subtitle": "subtitles.omni.weapon.fire",
+    "sounds": [
+      {
+        "name": "omni:weapon/scatter_blaster_fire"
+      }
+    ]
+  },
+  "weapon.marksman_rifle.fire": {
+    "subtitle": "subtitles.omni.weapon.fire",
+    "sounds": [
+      {
+        "name": "omni:weapon/marksman_rifle_fire"
+      }
+    ]
+  },
+  "weapon.stun_pistol.fire": {
+    "subtitle": "subtitles.omni.weapon.fire",
+    "sounds": [
+      {
+        "name": "omni:weapon/stun_pistol_fire"
+      }
+    ]
+  },
+  "weapon.ion_carbine.fire": {
+    "subtitle": "subtitles.omni.weapon.fire",
+    "sounds": [
+      {
+        "name": "omni:weapon/ion_carbine_fire"
+      }
+    ]
+  },
+  "weapon.overheat": {
+    "subtitle": "subtitles.omni.weapon.overheat",
+    "sounds": [
+      {
+        "name": "omni:weapon/overheat"
+      }
+    ]
+  },
+  "weapon.vent": {
+    "subtitle": "subtitles.omni.weapon.vent",
+    "sounds": [
+      {
+        "name": "omni:weapon/vent"
+      }
+    ]
+  },
+  "weapon.vent_fail": {
+    "subtitle": "subtitles.omni.weapon.vent_fail",
+    "sounds": [
+      {
+        "name": "omni:weapon/vent_fail"
+      }
+    ]
+  },
+  "weapon.reload_start": {
+    "subtitle": "subtitles.omni.weapon.reload",
+    "sounds": [
+      {
+        "name": "omni:weapon/reload_start"
+      }
+    ]
+  },
+  "weapon.reload_end": {
+    "subtitle": "subtitles.omni.weapon.reload",
+    "sounds": [
+      {
+        "name": "omni:weapon/reload_end"
+      }
+    ]
+  },
+  "weapon.dry_fire": {
+    "subtitle": "subtitles.omni.weapon.dry_fire",
+    "sounds": [
+      {
+        "name": "omni:weapon/dry_fire"
+      }
+    ]
+  },
+  "weapon.charge_start": {
+    "subtitle": "subtitles.omni.weapon.charge",
+    "sounds": [
+      {
+        "name": "omni:weapon/charge_start"
+      }
+    ]
+  },
+  "weapon.charge_full": {
+    "subtitle": "subtitles.omni.weapon.charge_full",
+    "sounds": [
+      {
+        "name": "omni:weapon/charge_full"
+      }
+    ]
+  },
+  "weapon.impact": {
+    "subtitle": "subtitles.omni.weapon.impact",
+    "sounds": [
+      {
+        "name": "omni:weapon/impact"
+      }
+    ]
+  },
+  "blade.parry": {
+    "subtitle": "subtitles.omni.blade.parry",
+    "sounds": [
+      {
+        "name": "omni:blade/parry"
+      }
+    ]
+  },
+  "blade.parry_perfect": {
+    "subtitle": "subtitles.omni.blade.parry_perfect",
+    "sounds": [
+      {
+        "name": "omni:blade/parry_perfect"
+      }
+    ]
+  },
+  "blade.guard_break": {
+    "subtitle": "subtitles.omni.blade.guard_break",
+    "sounds": [
+      {
+        "name": "omni:blade/guard_break"
+      }
+    ]
+  }
+}

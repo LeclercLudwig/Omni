@@ -10,6 +10,7 @@ import com.omni.weapon.WeaponDefinition;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.network.chat.Component;
 import net.minecraft.util.FastColor;
 import net.minecraft.world.item.ItemStack;
 
@@ -46,6 +47,7 @@ public final class HeatHud {
                     ? (now / 4 % 2 == 0 ? 0xFFFF2020 : 0xFF801010)
                     : FastColor.ARGB32.lerp(ratio, 0xFFFFD040, 0xFFFF4020);
             bar(graphics, ratio, color);
+            if (overheated) renderVentWindow(graphics, mc, state.inVentWindow(def, now, 0));
         });
     }
 
@@ -80,6 +82,26 @@ public final class HeatHud {
         int color = charge >= 1 ? (now / 3 % 2 == 0 ? 0xFFFFFFFF : 0xFF9FE8FF) : FastColor.ARGB32.lerp(charge, 0xFF5FA8FF, 0xFF9FE8FF);
         graphics.fill(x - 1, y - 1, x + WIDTH + 1, y + HEIGHT + 1, 0x90000000);
         graphics.fill(x, y, x + Math.round(WIDTH * charge), y + HEIGHT, color);
+    }
+
+    /**
+     * Surchauffe : cadre de la fenêtre de ventilation sur la jauge (vert quand la chaleur y est)
+     * et rappel de la touche.
+     */
+    private static void renderVentWindow(GuiGraphics graphics, Minecraft mc, boolean inWindow) {
+        int x = graphics.guiWidth() / 2 - WIDTH / 2;
+        int y = graphics.guiHeight() / 2 + 10;
+        int x0 = x + Math.round(WIDTH * BlasterState.VENT_WINDOW_MIN);
+        int x1 = x + Math.round(WIDTH * BlasterState.VENT_WINDOW_MAX);
+        int frame = inWindow ? 0xFF40FF70 : 0xFFF0F0F0;
+        graphics.fill(x0, y - 2, x1, y - 1, frame);
+        graphics.fill(x0, y + HEIGHT + 1, x1, y + HEIGHT + 2, frame);
+        graphics.fill(x0 - 1, y - 2, x0, y + HEIGHT + 2, frame);
+        graphics.fill(x1, y - 2, x1 + 1, y + HEIGHT + 2, frame);
+
+        Component hint = Component.translatable("hud.omni.vent", OmniKeys.RELOAD.getTranslatedKeyMessage());
+        graphics.drawString(mc.font, hint, graphics.guiWidth() / 2 - mc.font.width(hint) / 2, y + 17, // sous les munitions
+                inWindow ? 0xFF40FF70 : 0xFFF0F0F0, true);
     }
 
     private static void renderGuard(GuiGraphics graphics, GuardState guard, long now) {

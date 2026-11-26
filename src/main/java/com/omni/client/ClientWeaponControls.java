@@ -1,5 +1,6 @@
 package com.omni.client;
 
+import com.omni.registry.OmniSounds;
 import com.omni.network.ChargePayload;
 import com.omni.network.FirePayload;
 import com.omni.weapon.BlasterItem;
@@ -81,7 +82,13 @@ public final class ClientWeaponControls {
         trackReloadCompletion(player, stack, held.orElse(null), now);
 
         while (OmniKeys.RELOAD.consumeClick()) {
-            if (canAct) ClientPrediction.requestReload(player, mc.level, stack, held.get(), true);
+            if (!canAct) continue;
+            // Même touche, selon le contexte : ventiler une arme en surchauffe, sinon recharger.
+            if (BlasterItem.state(stack).overheatedAt(held.get(), now)) {
+                ClientPrediction.requestVent(player, mc.level, stack);
+            } else {
+                ClientPrediction.requestReload(player, mc.level, stack, held.get(), true);
+            }
         }
 
         boolean attackDown = canAct && mc.options.keyAttack.isDown();
@@ -198,7 +205,7 @@ public final class ClientWeaponControls {
             fullChargeCuePlayed = false;
             PacketDistributor.sendToServer(ChargePayload.INSTANCE); // le serveur mesure la durée lui-même
             player.level().playLocalSound(player.getX(), player.getEyeY(), player.getZ(),
-                    SoundEvents.BEACON_ACTIVATE, SoundSource.PLAYERS, 0.35F, 1.6F, false);
+                    OmniSounds.CHARGE_START.get(), SoundSource.PLAYERS, 0.35F, 1.0F, false);
         }
         if (!charging) return;
 
@@ -207,7 +214,7 @@ public final class ClientWeaponControls {
         if (!fullChargeCuePlayed && heldTicks >= charge.ticks()) {
             fullChargeCuePlayed = true;
             player.level().playLocalSound(player.getX(), player.getEyeY(), player.getZ(),
-                    SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.PLAYERS, 1.0F, 1.8F, false);
+                    OmniSounds.CHARGE_FULL.get(), SoundSource.PLAYERS, 0.8F, 1.0F, false);
         }
         if (!attackDown) { // relâché : le tir part
             charging = false;
@@ -228,7 +235,7 @@ public final class ClientWeaponControls {
         boolean reloading = def != null && BlasterItem.magazine(stack).isReloading(def, now);
         if (wasReloading && !reloading && def != null) {
             player.level().playLocalSound(player.getX(), player.getEyeY(), player.getZ(),
-                    SoundEvents.CROSSBOW_LOADING_END.value(), SoundSource.PLAYERS, 0.9F, 1.1F, false);
+                    OmniSounds.RELOAD_END.get(), SoundSource.PLAYERS, 0.9F, 1.0F, false);
         }
         wasReloading = reloading;
     }

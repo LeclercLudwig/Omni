@@ -1,5 +1,6 @@
 package com.omni.weapon;
 
+import com.omni.registry.OmniSounds;
 import com.omni.entity.BoltEntity;
 import com.omni.registry.OmniComponents;
 import net.minecraft.core.particles.ParticleTypes;
@@ -91,9 +92,8 @@ public final class BladeDeflection {
 
         Vec3 at = bolt.position();
         level.sendParticles(ParticleTypes.ELECTRIC_SPARK, at.x, at.y, at.z, perfect ? 14 : 6, 0.1, 0.1, 0.1, 0.25);
-        level.playSound(null, at.x, at.y, at.z, SoundEvents.SHIELD_BLOCK, SoundSource.PLAYERS, 0.8F, perfect ? 1.6F : 1.1F);
+        level.playSound(null, at.x, at.y, at.z, (perfect ? OmniSounds.PARRY_PERFECT : OmniSounds.PARRY).get(), SoundSource.PLAYERS, 1.0F, 0.95F + level.random.nextFloat() * 0.1F);
         if (perfect) {
-            level.playSound(null, at.x, at.y, at.z, SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.PLAYERS, 1.2F, 1.4F);
             if (defender instanceof ServerPlayer sp) {
                 sp.playNotifySound(SoundEvents.EXPERIENCE_ORB_PICKUP, SoundSource.PLAYERS, 0.4F, 1.8F);
             }

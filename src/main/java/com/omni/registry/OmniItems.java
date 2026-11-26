@@ -1,6 +1,8 @@
 package com.omni.registry;
 
 import com.omni.Omni;
+import com.omni.weapon.AttachmentItem;
+import com.omni.weapon.AttachmentType;
 import com.omni.weapon.BlasterItem;
 import com.omni.weapon.EnergyBladeItem;
 import net.minecraft.world.item.Item;
@@ -20,6 +22,15 @@ public final class OmniItems {
 
     /** Munition par défaut des blasters (voir "magazine" dans les JSON d'armes). */
     public static final DeferredItem<Item> GAS_CARTRIDGE = ITEMS.registerSimpleItem("gas_cartridge", new Item.Properties().stacksTo(16));
+
+    public static final DeferredItem<AttachmentItem> SCOPE = attachment("scope", AttachmentType.SCOPE);
+    public static final DeferredItem<AttachmentItem> STABILIZER = attachment("stabilizer", AttachmentType.STABILIZER);
+    public static final DeferredItem<AttachmentItem> HEAT_SINK = attachment("heat_sink", AttachmentType.HEAT_SINK);
+    public static final DeferredItem<AttachmentItem> STOCK = attachment("stock", AttachmentType.STOCK);
+
+    private static DeferredItem<AttachmentItem> attachment(String name, AttachmentType type) {
+        return ITEMS.register(name, () -> new AttachmentItem(type, new Item.Properties()));
+    }
 
     public static final DeferredItem<EnergyBladeItem> ENERGY_BLADE =
             ITEMS.register("energy_blade", () -> new EnergyBladeItem(new Item.Properties()));

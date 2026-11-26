@@ -10,6 +10,6 @@
   "heat": { "per_shot": 6, "max": 100, "cooling_per_tick": 1.4 },
   "aim_fov_multiplier": 0.75,
   "bolt_color": "#FF4A2A",
-  "fire_sound": "minecraft:entity.firework_rocket.blast",
+  "fire_sound": "omni:weapon.burst_carbine.fire",
   "magazine": { "capacity": 24, "reload_ticks": 40 }
 }

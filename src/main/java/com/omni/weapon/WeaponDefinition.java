@@ -107,6 +107,28 @@ public record WeaponDefinition(
         return firing.mode();
     }
 
+    // --- Copies modifiées (accessoires) ---
+
+    public WeaponDefinition withSpread(Spread value) {
+        return new WeaponDefinition(firing, boltType, damage, boltSpeed, range, fireDelayTicks, projectilesPerShot,
+                value, recoil, heat, aimFovMultiplier, headshotMultiplier, boltColor, fireSound, magazine);
+    }
+
+    public WeaponDefinition withRecoil(Recoil value) {
+        return new WeaponDefinition(firing, boltType, damage, boltSpeed, range, fireDelayTicks, projectilesPerShot,
+                spread, value, heat, aimFovMultiplier, headshotMultiplier, boltColor, fireSound, magazine);
+    }
+
+    public WeaponDefinition withHeat(Heat value) {
+        return new WeaponDefinition(firing, boltType, damage, boltSpeed, range, fireDelayTicks, projectilesPerShot,
+                spread, recoil, value, aimFovMultiplier, headshotMultiplier, boltColor, fireSound, magazine);
+    }
+
+    public WeaponDefinition withAimFovMultiplier(float value) {
+        return new WeaponDefinition(firing, boltType, damage, boltSpeed, range, fireDelayTicks, projectilesPerShot,
+                spread, recoil, heat, value, headshotMultiplier, boltColor, fireSound, magazine);
+    }
+
     /** Pour la synchro serveur → client (passe par NBT, largement suffisant pour quelques armes). */
     public static final StreamCodec<ByteBuf, WeaponDefinition> STREAM_CODEC = ByteBufCodecs.fromCodec(CODEC);
 }

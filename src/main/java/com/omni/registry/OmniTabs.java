@@ -23,6 +23,10 @@ public final class OmniTabs {
                     .displayItems((params, output) -> {
                         WeaponManager.all(true).keySet().forEach(id -> output.accept(BlasterItem.create(id)));
                         output.accept(OmniItems.GAS_CARTRIDGE.get());
+                        output.accept(OmniItems.SCOPE.get());
+                        output.accept(OmniItems.STABILIZER.get());
+                        output.accept(OmniItems.HEAT_SINK.get());
+                        output.accept(OmniItems.STOCK.get());
                         output.accept(OmniItems.ENERGY_BLADE.get());
                         output.accept(OmniItems.SOLDIER_SPAWN_EGG.get());
                     })

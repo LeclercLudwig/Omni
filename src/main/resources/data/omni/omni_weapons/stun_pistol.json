@@ -7,6 +7,6 @@
   "fire_delay_ticks": 10,
   "heat": { "per_shot": 15, "max": 100, "cooling_per_tick": 1.5 },
   "bolt_color": "#4DA6FF",
-  "fire_sound": "minecraft:block.beacon.power_select",
+  "fire_sound": "omni:weapon.stun_pistol.fire",
   "magazine": { "capacity": 8, "reload_ticks": 30 }
 }

@@ -1,5 +1,6 @@
 package com.omni.weapon;
 
+import com.omni.registry.OmniSounds;
 import com.omni.entity.BoltEntity;
 import com.omni.registry.OmniComponents;
 import net.minecraft.server.level.ServerLevel;
@@ -106,7 +107,7 @@ public final class BlasterLogic {
                 SoundEvent.createVariableRangeEvent(def.fireSound()), source, 1.0F, pitch);
         if (next.overheated()) {
             level.playSound(soundExcluded, shooter.getX(), shooter.getEyeY(), shooter.getZ(),
-                    SoundEvents.FIRE_EXTINGUISH, source, 0.8F, 1.2F);
+                    OmniSounds.OVERHEAT.get(), source, 0.8F, 1.0F);
         }
         return true;
     }
@@ -158,7 +159,7 @@ public final class BlasterLogic {
         stack.set(OmniComponents.MAGAZINE.get(), magazine.startReload(def, now));
         SoundSource source = shooter instanceof Player ? SoundSource.PLAYERS : SoundSource.HOSTILE;
         shooter.level().playSound(soundExcluded, shooter.getX(), shooter.getEyeY(), shooter.getZ(),
-                SoundEvents.CROSSBOW_LOADING_START.value(), source, 0.9F, 0.8F);
+                OmniSounds.RELOAD_START.get(), source, 0.9F, 1.0F);
         return true;
     }
 
@@ -179,6 +180,38 @@ public final class BlasterLogic {
         if (start == null) return 0;
         long measured = player.level().getGameTime() - start + CHARGE_TOLERANCE_TICKS;
         return def.firing().charge().factor((int) Math.max(0, Math.min(claimedTicks, measured)));
+    }
+
+    public enum VentOutcome { NONE, VENTED, JAMMED }
+
+    /** Marge de la fenêtre de ventilation côté serveur (latence : la chaleur a un peu baissé). */
+    private static final float SERVER_VENT_TOLERANCE = 0.04F;
+
+    /**
+     * Ventilation (refroidissement actif) d'une arme en surchauffe : dans la fenêtre, l'arme est
+     * froide tout de suite ; en dehors, elle s'enraye (chaleur au maximum).
+     */
+    public static VentOutcome tryVent(LivingEntity shooter, ItemStack stack, float tolerance, @Nullable Player soundExcluded) {
+        WeaponDefinition def = BlasterItem.definition(shooter.level().isClientSide, stack).orElse(null);
+        if (def == null) return VentOutcome.NONE;
+        long now = shooter.level().getGameTime();
+        BlasterState state = BlasterItem.state(stack);
+        if (!state.overheatedAt(def, now)) return VentOutcome.NONE;
+
+        boolean success = state.inVentWindow(def, now, tolerance);
+        stack.set(OmniComponents.STATE.get(), success ? state.vented(now) : state.jammed(def, now));
+        SoundSource source = shooter instanceof Player ? SoundSource.PLAYERS : SoundSource.HOSTILE;
+        shooter.level().playSound(soundExcluded, shooter.getX(), shooter.getEyeY(), shooter.getZ(),
+                (success ? OmniSounds.VENT : OmniSounds.VENT_FAIL).get(), source, 0.9F, 1.0F);
+        return success ? VentOutcome.VENTED : VentOutcome.JAMMED;
+    }
+
+    /** Ventilation demandée par un joueur (paquet {@code VentPayload}). */
+    public static void tryVent(ServerPlayer player) {
+        if (player.isSpectator()) return;
+        if (tryVent(player, player.getMainHandItem(), SERVER_VENT_TOLERANCE, player) == VentOutcome.NONE) {
+            resync(player, player.level().getGameTime());
+        }
     }
 
     /** Rechargement demandé par un joueur (paquet {@code ReloadPayload}). */

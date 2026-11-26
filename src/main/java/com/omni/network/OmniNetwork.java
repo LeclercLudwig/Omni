@@ -30,6 +30,13 @@ public final class OmniNetwork {
                     }
                 }));
 
+        registrar.playToServer(VentPayload.TYPE, VentPayload.STREAM_CODEC, (payload, context) ->
+                context.enqueueWork(() -> {
+                    if (context.player() instanceof ServerPlayer player) {
+                        BlasterLogic.tryVent(player);
+                    }
+                }));
+
         registrar.playToServer(ReloadPayload.TYPE, ReloadPayload.STREAM_CODEC, (payload, context) ->
                 context.enqueueWork(() -> {
                     if (context.player() instanceof ServerPlayer player) {

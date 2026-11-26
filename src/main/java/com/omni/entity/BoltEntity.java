@@ -1,6 +1,7 @@
 package com.omni.entity;
 
 import com.omni.registry.OmniEntities;
+import com.omni.registry.OmniSounds;
 import com.omni.registry.OmniTags;
 import com.omni.weapon.BladeDeflection;
 import com.omni.weapon.BoltType;
@@ -22,6 +23,7 @@ import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.entity.projectile.ProjectileDeflection;
 import net.minecraft.world.entity.projectile.ProjectileUtil;
@@ -261,12 +263,16 @@ public class BoltEntity extends Projectile {
         if (level() instanceof ServerLevel server) {
             // Le tireur a déjà vu l'impact de son tir prédit : on ne lui renvoie pas les particules.
             Entity owner = getOwner();
+            server.playSound(owner instanceof Player p ? p : null, pos.x, pos.y, pos.z,
+                    OmniSounds.IMPACT.get(), SoundSource.NEUTRAL, 0.6F, 0.9F + random.nextFloat() * 0.2F);
             for (ServerPlayer viewer : server.players()) {
                 if (viewer == owner) continue;
                 server.sendParticles(viewer, ParticleTypes.ELECTRIC_SPARK, false, pos.x, pos.y, pos.z, 6, 0.05, 0.05, 0.05, 0.15);
                 server.sendParticles(viewer, ParticleTypes.SMOKE, false, pos.x, pos.y, pos.z, 2, 0.02, 0.02, 0.02, 0.01);
             }
         } else if (predicted) {
+            level().playLocalSound(pos.x, pos.y, pos.z, OmniSounds.IMPACT.get(), SoundSource.NEUTRAL,
+                    0.6F, 0.9F + random.nextFloat() * 0.2F, false);
             for (int i = 0; i < 6; i++) {
                 level().addParticle(ParticleTypes.ELECTRIC_SPARK, pos.x, pos.y, pos.z,
                         (random.nextDouble() - 0.5) * 0.3, (random.nextDouble() - 0.5) * 0.3, (random.nextDouble() - 0.5) * 0.3);

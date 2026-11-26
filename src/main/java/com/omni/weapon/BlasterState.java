@@ -78,6 +78,26 @@ public record BlasterState(float heat, long lastUpdate, boolean overheated, long
         return now >= nextShot - jitterTolerance;
     }
 
+    /** Fenêtre de ventilation (fraction de la chaleur max) pendant une surchauffe. */
+    public static final float VENT_WINDOW_MIN = 0.35F;
+    public static final float VENT_WINDOW_MAX = 0.55F;
+
+    /** La chaleur traverse-t-elle la fenêtre de ventilation (± {@code tolerance}) ? */
+    public boolean inVentWindow(WeaponDefinition def, long now, float tolerance) {
+        float ratio = heatAt(def, now) / def.heat().max();
+        return ratio >= VENT_WINDOW_MIN - tolerance && ratio <= VENT_WINDOW_MAX + tolerance;
+    }
+
+    /** Ventilation réussie : froid et déverrouillé immédiatement. */
+    public BlasterState vented(long now) {
+        return new BlasterState(0, now, false, lastShot, nextShot, burstShots);
+    }
+
+    /** Ventilation ratée : l'arme s'enraye, la surchauffe repart du maximum. */
+    public BlasterState jammed(WeaponDefinition def, long now) {
+        return new BlasterState(def.heat().max(), now, true, lastShot, nextShot, burstShots);
+    }
+
     public BlasterState afterShot(WeaponDefinition def, long now) {
         float newHeat = heatAt(def, now) + def.heat().perShot();
         boolean overheat = newHeat >= def.heat().max();

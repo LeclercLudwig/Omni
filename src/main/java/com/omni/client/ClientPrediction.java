@@ -1,11 +1,13 @@
 package com.omni.client;
 
+import com.omni.registry.OmniSounds;
 import com.omni.entity.BoltEntity;
 import com.omni.entity.MuzzlePositions;
 import com.omni.registry.OmniComponents;
 import com.omni.weapon.BlasterItem;
 import com.omni.weapon.BlasterLogic;
 import com.omni.network.ReloadPayload;
+import com.omni.network.VentPayload;
 import com.omni.weapon.BlasterState;
 import com.omni.weapon.MagazineState;
 import com.omni.weapon.WeaponDefinition;
@@ -60,7 +62,7 @@ public final class ClientPrediction {
                 SoundEvent.createVariableRangeEvent(def.fireSound()), SoundSource.PLAYERS, 1.0F, pitch, false);
         if (next.overheated()) {
             level.playLocalSound(player.getX(), player.getEyeY(), player.getZ(),
-                    SoundEvents.FIRE_EXTINGUISH, SoundSource.PLAYERS, 0.8F, 1.2F, false);
+                    OmniSounds.OVERHEAT.get(), SoundSource.PLAYERS, 0.8F, 1.0F, false);
         }
     }
 
@@ -80,14 +82,14 @@ public final class ClientPrediction {
             if (feedback) {
                 player.displayClientMessage(Component.translatable("message.omni.no_ammo"), true);
                 level.playLocalSound(player.getX(), player.getEyeY(), player.getZ(),
-                        SoundEvents.DISPENSER_FAIL, SoundSource.PLAYERS, 0.6F, 1.6F, false);
+                        OmniSounds.DRY_FIRE.get(), SoundSource.PLAYERS, 0.7F, 1.0F, false);
             }
             return;
         }
 
         stack.set(OmniComponents.MAGAZINE.get(), magazine.startReload(def, now));
         level.playLocalSound(player.getX(), player.getEyeY(), player.getZ(),
-                SoundEvents.CROSSBOW_LOADING_START.value(), SoundSource.PLAYERS, 0.9F, 0.8F, false);
+                OmniSounds.RELOAD_START.get(), SoundSource.PLAYERS, 0.9F, 1.0F, false);
         PacketDistributor.sendToServer(ReloadPayload.INSTANCE);
     }
 
@@ -112,5 +114,12 @@ public final class ClientPrediction {
         double up = Mth.lerp(aim, -0.40, -0.28) * k;
         double forward = Mth.lerp(aim, 1.4, 1.33);
         return MuzzlePositions.frame(player).at(player.getEyePosition(), forward, right, up);
+    }
+
+    /** Ventilation prédite localement (sans marge), puis confirmée ou corrigée par le serveur. */
+    public static void requestVent(LocalPlayer player, ClientLevel level, ItemStack stack) {
+        if (BlasterLogic.tryVent(player, stack, 0, null) != BlasterLogic.VentOutcome.NONE) {
+            PacketDistributor.sendToServer(VentPayload.INSTANCE);
+        }
     }
 }

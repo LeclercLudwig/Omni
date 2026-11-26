@@ -1,5 +1,6 @@
 package com.omni.weapon;
 
+import com.omni.registry.OmniSounds;
 import com.omni.registry.OmniComponents;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
@@ -61,7 +62,7 @@ public class EnergyBladeItem extends SwordItem {
             stack.set(OmniComponents.GUARD.get(), guard(stack).broken(now));
             if (entity instanceof Player p) p.getCooldowns().addCooldown(stack.getItem(), GuardState.BREAK_COOLDOWN_TICKS);
             level.playSound(null, entity.getX(), entity.getY(), entity.getZ(),
-                    SoundEvents.SHIELD_BREAK, SoundSource.PLAYERS, 0.8F, 1.3F);
+                    OmniSounds.GUARD_BREAK.get(), SoundSource.PLAYERS, 1.0F, 1.0F);
         }
         entity.stopUsingItem();
     }

@@ -6,6 +6,7 @@ import com.omni.network.OmniNetwork;
 import com.omni.registry.OmniComponents;
 import com.omni.registry.OmniEntities;
 import com.omni.registry.OmniItems;
+import com.omni.registry.OmniSounds;
 import com.omni.registry.OmniTabs;
 import com.omni.weapon.WeaponManager;
 import net.minecraft.resources.ResourceLocation;
@@ -34,6 +35,7 @@ public class Omni {
         OmniItems.ITEMS.register(modBus);
         OmniEntities.ENTITIES.register(modBus);
         OmniTabs.TABS.register(modBus);
+        OmniSounds.SOUNDS.register(modBus);
 
         modBus.addListener(OmniNetwork::register);
         modBus.addListener(Omni::registerAttributes);

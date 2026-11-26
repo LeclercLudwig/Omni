@@ -1,6 +1,7 @@
 package com.omni.registry;
 
 import com.omni.Omni;
+import com.omni.weapon.Attachments;
 import com.omni.weapon.BlasterState;
 import com.omni.weapon.GuardState;
 import com.omni.weapon.MagazineState;
@@ -34,6 +35,13 @@ public final class OmniComponents {
             COMPONENTS.register("magazine", () -> DataComponentType.<MagazineState>builder()
                     .persistent(MagazineState.CODEC)
                     .networkSynchronized(MagazineState.STREAM_CODEC)
+                    .build());
+
+    /** Accessoires posés sur un blaster. */
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<Attachments>> ATTACHMENTS =
+            COMPONENTS.register("attachments", () -> DataComponentType.<Attachments>builder()
+                    .persistent(Attachments.CODEC)
+                    .networkSynchronized(Attachments.STREAM_CODEC)
                     .build());
 
     /** Endurance de garde de la lame à énergie. */

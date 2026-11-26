@@ -23,8 +23,8 @@ Java 21 est téléchargé automatiquement par Gradle si besoin. En jeu : onglet 
 ./gradlew runGameTestServer
 ```
 
-38 GameTests (`gametest/`) vérifient la cadence, la dispersion, la surchauffe, les dégâts,
-les headshots, les effets stun/ion, la prédiction, les munitions, les modes rafale et chargé, le comportement des soldats et la parade. Ils tournent aussi sur GitHub Actions à chaque push.
+45 GameTests (`gametest/`) vérifient la cadence, la dispersion, la surchauffe, les dégâts,
+les headshots, les effets stun/ion, la prédiction, les munitions, les modes rafale et chargé, la ventilation, les accessoires, le comportement des soldats et la parade. Ils tournent aussi sur GitHub Actions à chaque push.
 
 ## Modes de tir
 
@@ -46,6 +46,30 @@ Chaque arme a un chargeur (bloc `"magazine"` du JSON : capacité, durée de rech
   + poudre à canon + poudre de glowstone ; les soldats en lâchent 0 à 2 ;
 - compteur « tirs/capacité ×réserve » sous le réticule, barre de rechargement, arme qui s'abaisse ;
 - les soldats rechargent (munitions illimitées) en se mettant à couvert.
+
+## Refroidissement actif
+
+En surchauffe, une zone apparaît sur la jauge (35–55 % de chaleur) : appuyer sur **R** quand la jauge
+la traverse **ventile** l'arme (froide tout de suite) ; en dehors, l'arme **s'enraye** (chaleur au maximum).
+Hors surchauffe, R recharge.
+
+## Accessoires
+
+| Accessoire | Emplacement | Effet | Recette (sans forme) |
+|---|---|---|---|
+| Lunette | viseur | zoom ×0,6 en visée, dispersion en visée −50 % | fer + 2 vitres + redstone |
+| Stabilisateur | canon | dispersion −30 %, recul −15 % | 2 fer + cuivre |
+| Dissipateur thermique | canon | chaleur par tir −30 %, refroidissement +25 % | 3 cuivre + fer |
+| Crosse | crosse | recul −40 % | 2 planches + cuir + fer |
+
+Dans l'inventaire, **clic droit avec l'accessoire sur le blaster** pour le poser (l'ancien du même
+emplacement revient en main) ; **clic droit main vide** pour en retirer un. Les soldats en lâchent parfois.
+
+## Sons
+
+Sons propres au mod, synthétisés (`assets/omni/sounds`, déclarés dans `sounds.json`) : un tir par arme,
+surchauffe, ventilation, rechargement, clic à vide, charge, impact, parade, garde brisée.
+Remplaçables par un pack de ressources.
 
 ## Soldats
 
@@ -118,8 +142,6 @@ Le serveur fait autorité : le client ne fait qu'envoyer « je tire » et pré-f
 
 - Prédiction client : afficher le tir immédiatement côté tireur, avant la réponse du serveur
 - Recul lissé sur plusieurs frames au lieu d'un à-coup instantané
-- Refroidissement actif (QTE)
-- Vrais sons (`sounds.json` + `.ogg`) et modèles Blockbench
 
 ## Licence
 

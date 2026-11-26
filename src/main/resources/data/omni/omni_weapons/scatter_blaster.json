@@ -11,6 +11,6 @@
   "aim_fov_multiplier": 0.9,
   "headshot_multiplier": 1.2,
   "bolt_color": "#FF8C1A",
-  "fire_sound": "minecraft:entity.firework_rocket.large_blast",
+  "fire_sound": "omni:weapon.scatter_blaster.fire",
   "magazine": { "capacity": 6, "reload_ticks": 50 }
 }
