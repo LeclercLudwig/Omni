@@ -1,0 +1,21 @@
+{
+  "itemGroup.omni": "Omni",
+  "item.omni.blaster": "Blaster",
+  "entity.omni.bolt": "Tir de blaster",
+  "weapon.omni.blaster_pistol": "Pistolet blaster",
+  "weapon.omni.blaster_rifle": "Fusil blaster",
+  "weapon.omni.heavy_repeater": "Répéteur lourd",
+  "weapon.omni.scatter_blaster": "Blaster à dispersion",
+  "weapon.omni.marksman_rifle": "Fusil de précision",
+  "weapon.omni.stun_pistol": "Pistolet paralysant",
+  "weapon.omni.ion_carbine": "Carabine ionique",
+  "tooltip.omni.damage": "Dégâts : %s ×%s",
+  "tooltip.omni.fire_mode.semi": "Semi-automatique",
+  "tooltip.omni.fire_mode.auto": "Automatique",
+  "tooltip.omni.bolt_type.standard": "Tir standard",
+  "tooltip.omni.bolt_type.stun": "Tir paralysant",
+  "tooltip.omni.bolt_type.ion": "Tir ionique",
+  "death.attack.omni.blaster": "%1$s a été abattu par %2$s",
+  "death.attack.omni.blaster.item": "%1$s a été abattu par %2$s avec %3$s",
+  "death.attack.omni.blaster.player": "%1$s a été abattu en combattant %2$s"
+}

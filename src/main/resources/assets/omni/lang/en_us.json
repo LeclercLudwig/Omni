@@ -1,0 +1,21 @@
+{
+  "itemGroup.omni": "Omni",
+  "item.omni.blaster": "Blaster",
+  "entity.omni.bolt": "Blaster Bolt",
+  "weapon.omni.blaster_pistol": "Blaster Pistol",
+  "weapon.omni.blaster_rifle": "Blaster Rifle",
+  "weapon.omni.heavy_repeater": "Heavy Repeater",
+  "weapon.omni.scatter_blaster": "Scatter Blaster",
+  "weapon.omni.marksman_rifle": "Marksman Rifle",
+  "weapon.omni.stun_pistol": "Stun Pistol",
+  "weapon.omni.ion_carbine": "Ion Carbine",
+  "tooltip.omni.damage": "Damage: %s ×%s",
+  "tooltip.omni.fire_mode.semi": "Semi-automatic",
+  "tooltip.omni.fire_mode.auto": "Automatic",
+  "tooltip.omni.bolt_type.standard": "Standard bolt",
+  "tooltip.omni.bolt_type.stun": "Stun bolt",
+  "tooltip.omni.bolt_type.ion": "Ion bolt",
+  "death.attack.omni.blaster": "%1$s was shot by %2$s",
+  "death.attack.omni.blaster.item": "%1$s was shot by %2$s using %3$s",
+  "death.attack.omni.blaster.player": "%1$s was shot while fighting %2$s"
+}

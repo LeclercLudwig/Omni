@@ -1,0 +1,14 @@
+{
+  "fire_mode": "semi",
+  "damage": 18.0,
+  "bolt_speed": 3.8,
+  "range": 160,
+  "fire_delay_ticks": 25,
+  "spread": { "hip": 6.0, "aim": 0.0 },
+  "recoil": { "pitch": 7.0, "yaw_jitter": 0.3 },
+  "heat": { "per_shot": 35, "max": 100, "cooling_per_tick": 1.0 },
+  "aim_fov_multiplier": 0.3,
+  "headshot_multiplier": 2.0,
+  "bolt_color": "#FF2020",
+  "fire_sound": "minecraft:entity.firework_rocket.large_blast"
+}

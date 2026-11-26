@@ -1,0 +1,11 @@
+{
+  "fire_mode": "semi",
+  "bolt_type": "stun",
+  "damage": 1.0,
+  "bolt_speed": 2.0,
+  "range": 32,
+  "fire_delay_ticks": 10,
+  "heat": { "per_shot": 15, "max": 100, "cooling_per_tick": 1.5 },
+  "bolt_color": "#4DA6FF",
+  "fire_sound": "minecraft:block.beacon.power_select"
+}

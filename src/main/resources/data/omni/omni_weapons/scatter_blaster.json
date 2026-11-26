@@ -1,0 +1,15 @@
+{
+  "fire_mode": "semi",
+  "damage": 2.5,
+  "projectiles_per_shot": 8,
+  "bolt_speed": 2.2,
+  "range": 24,
+  "fire_delay_ticks": 14,
+  "spread": { "hip": 9.0, "aim": 7.0 },
+  "recoil": { "pitch": 6.0, "yaw_jitter": 1.0 },
+  "heat": { "per_shot": 25, "max": 100, "cooling_per_tick": 2.0 },
+  "aim_fov_multiplier": 0.9,
+  "headshot_multiplier": 1.2,
+  "bolt_color": "#FF8C1A",
+  "fire_sound": "minecraft:entity.firework_rocket.large_blast"
+}

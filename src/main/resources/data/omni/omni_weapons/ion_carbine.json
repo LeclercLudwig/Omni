@@ -1,0 +1,11 @@
+{
+  "fire_mode": "semi",
+  "bolt_type": "ion",
+  "damage": 4.0,
+  "bolt_speed": 2.4,
+  "range": 64,
+  "fire_delay_ticks": 6,
+  "heat": { "per_shot": 12, "max": 100, "cooling_per_tick": 1.4 },
+  "bolt_color": "#7FE7FF",
+  "fire_sound": "minecraft:block.respawn_anchor.charge"
+}

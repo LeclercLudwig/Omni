@@ -1,0 +1,13 @@
+{
+  "fire_mode": "auto",
+  "damage": 5.0,
+  "bolt_speed": 3.0,
+  "range": 96,
+  "fire_delay_ticks": 3,
+  "spread": { "hip": 4.0, "aim": 1.0 },
+  "recoil": { "pitch": 1.2, "yaw_jitter": 0.6 },
+  "heat": { "per_shot": 7, "max": 100, "cooling_per_tick": 1.5 },
+  "aim_fov_multiplier": 0.75,
+  "bolt_color": "#FF3B30",
+  "fire_sound": "minecraft:entity.firework_rocket.blast"
+}
