@@ -4,7 +4,9 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
 import com.omni.entity.BoltEntity;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
@@ -24,6 +26,18 @@ public class BoltRenderer extends EntityRenderer<BoltEntity> {
 
     public BoltRenderer(EntityRendererProvider.Context context) {
         super(context);
+    }
+
+    /**
+     * Le joueur local voit ses propres tirs via leurs copies prédites (voir ClientPrediction) :
+     * on masque les vrais, qui arrivent du serveur avec un temps de retard.
+     */
+    @Override
+    public boolean shouldRender(BoltEntity bolt, Frustum frustum, double camX, double camY, double camZ) {
+        if (!bolt.isPredicted() && bolt.getOwner() != null && bolt.getOwner() == Minecraft.getInstance().player) {
+            return false;
+        }
+        return super.shouldRender(bolt, frustum, camX, camY, camZ);
     }
 
     @Override

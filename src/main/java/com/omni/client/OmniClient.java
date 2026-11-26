@@ -24,6 +24,7 @@ public class OmniClient {
         NeoForge.EVENT_BUS.addListener(ClientWeaponControls::onClientTick);
         NeoForge.EVENT_BUS.addListener(ClientWeaponControls::onComputeFov);
         NeoForge.EVENT_BUS.addListener(ClientWeaponControls::onPlayerTurn);
+        NeoForge.EVENT_BUS.addListener(RecoilController::onRenderFrame);
     }
 
     private static void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {

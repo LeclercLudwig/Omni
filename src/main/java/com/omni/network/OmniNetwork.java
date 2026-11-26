@@ -19,7 +19,7 @@ public final class OmniNetwork {
         registrar.playToServer(FirePayload.TYPE, FirePayload.STREAM_CODEC, (payload, context) ->
                 context.enqueueWork(() -> {
                     if (context.player() instanceof ServerPlayer player) {
-                        BlasterLogic.tryFire(player, payload.aiming());
+                        BlasterLogic.tryFire(player, payload.aiming(), payload.seed());
                     }
                 }));
 

@@ -60,6 +60,7 @@ public final class ClientWeaponControls {
         if (player == null || mc.level == null) {
             aimProgress = 0;
             attackWasDown = false;
+            lastLocalShot = Long.MIN_VALUE / 2;
             return;
         }
 
@@ -86,16 +87,18 @@ public final class ClientWeaponControls {
         if (now >= lastLocalShot && now - lastLocalShot < def.fireDelayTicks()) return;
         lastLocalShot = now;
 
-        PacketDistributor.sendToServer(new FirePayload(aiming));
-        applyRecoil(player, def, aiming);
+        // Même graine des deux côtés : le tir prédit suit exactement la trajectoire du vrai.
+        int seed = RANDOM.nextInt();
+        PacketDistributor.sendToServer(new FirePayload(aiming, seed));
+        ClientPrediction.predictShot(player, mc.level, stack, def, aiming, seed);
+        applyRecoil(def, aiming);
     }
 
-    private static void applyRecoil(LocalPlayer player, WeaponDefinition def, boolean aiming) {
+    private static void applyRecoil(WeaponDefinition def, boolean aiming) {
         float factor = aiming ? 0.5F : 1.0F;
         float pitch = def.recoil().pitch() * factor;
         float yaw = (RANDOM.nextFloat() * 2 - 1) * def.recoil().yawJitter() * factor;
-        // turn() multiplie par 0.15 et borne le pitch : on compense.
-        player.turn(yaw / 0.15, -pitch / 0.15);
+        RecoilController.kick(pitch, yaw);
     }
 
     /** Zoom en visée (seulement le FOV du monde, pas celui de la main). */

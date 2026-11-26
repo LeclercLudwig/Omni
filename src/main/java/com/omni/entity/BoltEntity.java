@@ -43,6 +43,8 @@ public class BoltEntity extends Projectile {
     private float headshotMultiplier = 1.5F;
     private BoltType boltType = BoltType.STANDARD;
     private int maxLifeTicks = 60;
+    /** Copie locale créée par le client du tireur pour afficher le tir sans attendre le serveur. */
+    private boolean predicted;
 
     public BoltEntity(EntityType<? extends BoltEntity> type, Level level) {
         super(type, level);
@@ -59,6 +61,20 @@ public class BoltEntity extends Projectile {
         this.entityData.set(COLOR, def.boltColor());
     }
 
+    /**
+     * Tir prédit : n'existe que dans le monde client du tireur, n'inflige aucun dégât
+     * (c'est le tir du serveur qui compte) et disparaît à l'impact comme le vrai.
+     */
+    public static BoltEntity predicted(Level clientLevel, LivingEntity shooter, WeaponDefinition def) {
+        BoltEntity bolt = new BoltEntity(clientLevel, shooter, def);
+        bolt.predicted = true;
+        return bolt;
+    }
+
+    public boolean isPredicted() {
+        return predicted;
+    }
+
     @Override
     protected void defineSynchedData(SynchedEntityData.Builder builder) {
         builder.define(COLOR, 0xFF3B30);
@@ -72,7 +88,7 @@ public class BoltEntity extends Projectile {
     public void tick() {
         super.tick(); // gère "a quitté le tireur" (pour ne pas se toucher soi-même)
 
-        if (!level().isClientSide && tickCount > maxLifeTicks) {
+        if ((!level().isClientSide || predicted) && tickCount > maxLifeTicks) {
             discard();
             return;
         }
@@ -93,7 +109,12 @@ public class BoltEntity extends Projectile {
     @Override
     protected void onHitEntity(EntityHitResult result) {
         super.onHitEntity(result);
-        if (level().isClientSide) return;
+        if (level().isClientSide) {
+            // Côté client, simple effet visuel : les dégâts sont décidés par le serveur.
+            if (predicted) impactEffects(impactPoint(result.getEntity()));
+            discard();
+            return;
+        }
 
         Entity target = result.getEntity();
         Vec3 impact = impactPoint(target);
@@ -151,8 +172,19 @@ public class BoltEntity extends Projectile {
 
     private void impactEffects(Vec3 pos) {
         if (level() instanceof ServerLevel server) {
-            server.sendParticles(ParticleTypes.ELECTRIC_SPARK, pos.x, pos.y, pos.z, 6, 0.05, 0.05, 0.05, 0.15);
-            server.sendParticles(ParticleTypes.SMOKE, pos.x, pos.y, pos.z, 2, 0.02, 0.02, 0.02, 0.01);
+            // Le tireur a déjà vu l'impact de son tir prédit : on ne lui renvoie pas les particules.
+            Entity owner = getOwner();
+            for (ServerPlayer viewer : server.players()) {
+                if (viewer == owner) continue;
+                server.sendParticles(viewer, ParticleTypes.ELECTRIC_SPARK, false, pos.x, pos.y, pos.z, 6, 0.05, 0.05, 0.05, 0.15);
+                server.sendParticles(viewer, ParticleTypes.SMOKE, false, pos.x, pos.y, pos.z, 2, 0.02, 0.02, 0.02, 0.01);
+            }
+        } else if (predicted) {
+            for (int i = 0; i < 6; i++) {
+                level().addParticle(ParticleTypes.ELECTRIC_SPARK, pos.x, pos.y, pos.z,
+                        (random.nextDouble() - 0.5) * 0.3, (random.nextDouble() - 0.5) * 0.3, (random.nextDouble() - 0.5) * 0.3);
+            }
+            level().addParticle(ParticleTypes.SMOKE, pos.x, pos.y, pos.z, 0, 0.01, 0);
         }
     }
 
