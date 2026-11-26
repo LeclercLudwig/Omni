@@ -2,6 +2,7 @@ package com.omni.registry;
 
 import com.omni.Omni;
 import com.omni.weapon.BlasterItem;
+import com.omni.weapon.EnergyBladeItem;
 import net.minecraft.world.item.Item;
 import net.neoforged.neoforge.common.DeferredSpawnEggItem;
 import net.neoforged.neoforge.registries.DeferredItem;
@@ -16,6 +17,9 @@ public final class OmniItems {
      */
     public static final DeferredItem<BlasterItem> BLASTER =
             ITEMS.register("blaster", () -> new BlasterItem(new Item.Properties().stacksTo(1)));
+
+    public static final DeferredItem<EnergyBladeItem> ENERGY_BLADE =
+            ITEMS.register("energy_blade", () -> new EnergyBladeItem(new Item.Properties()));
 
     public static final DeferredItem<DeferredSpawnEggItem> SOLDIER_SPAWN_EGG = ITEMS.register("soldier_spawn_egg",
             () -> new DeferredSpawnEggItem(OmniEntities.SOLDIER, 0x5B6148, 0xD0532E, new Item.Properties()));

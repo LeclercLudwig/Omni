@@ -23,8 +23,8 @@ Java 21 est téléchargé automatiquement par Gradle si besoin. En jeu : onglet 
 ./gradlew runGameTestServer
 ```
 
-17 GameTests (`gametest/`) vérifient la cadence, la dispersion, la surchauffe, les dégâts,
-les headshots, les effets stun/ion, la prédiction et le comportement des soldats. Ils tournent aussi sur GitHub Actions à chaque push.
+24 GameTests (`gametest/`) vérifient la cadence, la dispersion, la surchauffe, les dégâts,
+les headshots, les effets stun/ion, la prédiction, le comportement des soldats et la parade. Ils tournent aussi sur GitHub Actions à chaque push.
 
 ## Soldats
 
@@ -36,6 +36,18 @@ Ennemis armés des mêmes blasters que le joueur (fusil, pistolet ou répéteur 
 - précision selon la difficulté ; apparaissent la nuit par groupes de 2 à 4 (`data/omni/neoforge/biome_modifier`).
 
 Œuf d'apparition dans l'onglet créatif **Omni**.
+
+## Lame à énergie
+
+Arme de mêlée qui pare les tirs de blaster :
+
+- **clic droit maintenu** : garde ; un tir arrivant de face (cône de 55°) repart vers son origine ;
+- **parade parfaite** (garde levée moins de 0,3 s avant l'impact) : le tir repart **là où vous visez**,
+  plus vite et plus fort ;
+- **endurance** (jauge sous le réticule) : la garde tenue s'épuise en ~3 s, une parade normale coûte 20,
+  une parade parfaite rend 10 ; à zéro, la garde se brise pendant 2 s ;
+- chaque parade use la lame ; un tir renvoyé change de camp et peut toucher son tireur ;
+- face à une garde, les soldats retiennent leur tir 1 à 2 s en la contournant, puis tirent pour l'épuiser.
 
 ## Ajouter une arme
 
@@ -87,7 +99,6 @@ Le serveur fait autorité : le client ne fait qu'envoyer « je tire » et pré-f
 - Modes `burst` et `charged` (tir chargé du sniper)
 - Cartouches de gaz (munitions) et refroidissement actif (QTE)
 - Vrais sons (`sounds.json` + `.ogg`) et modèles Blockbench
-- Déviation au sabre via `ProjectileDeflection` (déjà géré dans `BoltEntity#tick`)
 
 ## Licence
 

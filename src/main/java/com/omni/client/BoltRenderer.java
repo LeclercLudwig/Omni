@@ -30,11 +30,13 @@ public class BoltRenderer extends EntityRenderer<BoltEntity> {
 
     /**
      * Le joueur local voit ses propres tirs via leurs copies prédites (voir ClientPrediction) :
-     * on masque les vrais, qui arrivent du serveur avec un temps de retard.
+     * on masque les vrais, qui arrivent du serveur avec un temps de retard. Un tir dévié par une
+     * parade redevient visible : il revient vers le tireur.
      */
     @Override
     public boolean shouldRender(BoltEntity bolt, Frustum frustum, double camX, double camY, double camZ) {
-        if (!bolt.isPredicted() && bolt.getOwner() != null && bolt.getOwner() == Minecraft.getInstance().player) {
+        if (!bolt.isPredicted() && !bolt.isDeflected()
+                && bolt.getOwner() != null && bolt.getOwner() == Minecraft.getInstance().player) {
             return false;
         }
         return super.shouldRender(bolt, frustum, camX, camY, camZ);

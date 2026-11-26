@@ -1,6 +1,7 @@
 package com.omni.entity.ai;
 
 import com.omni.entity.SoldierEntity;
+import com.omni.weapon.BladeDeflection;
 import com.omni.weapon.BlasterItem;
 import com.omni.weapon.BlasterLogic;
 import com.omni.weapon.BlasterState;
@@ -21,7 +22,9 @@ import java.util.EnumSet;
  * <ul>
  *   <li><b>ENGAGE</b> : se place entre {@link #MIN_RANGE} et {@link #MAX_ENGAGE_RANGE} blocs,
  *       se déplace latéralement et tire par rafales dès qu'il voit la cible (après un temps de
- *       réaction).</li>
+ *       réaction). Face à une garde (lame à énergie), il retient son tir 1 à 2 s en se décalant
+ *       vite pour la contourner, puis tire quand même pour l'épuiser (chaque parade coûte de
+ *       l'endurance à la cible).</li>
  *   <li><b>COVER</b> : arme en surchauffe ou blessure → cherche une position hors de vue de la
  *       cible (à défaut, recule), attend que l'arme refroidisse, puis repart à l'assaut.</li>
  * </ul>
@@ -50,6 +53,8 @@ public class SoldierCombatGoal extends Goal {
     private int hurtCoverCooldown;
     private int repathCooldown;
     private boolean coverBecauseHot;
+    private int guardHoldTicks;
+    private int guardHoldLimit = 30;
 
     public SoldierCombatGoal(SoldierEntity soldier) {
         this.soldier = soldier;
@@ -146,7 +151,8 @@ public class SoldierCombatGoal extends Goal {
                 if (soldier.getRandom().nextFloat() < 0.4F) strafeDirection = -strafeDirection;
             }
             float forward = distance < MIN_RANGE ? -0.5F : 0;
-            soldier.getMoveControl().strafe(forward, strafeDirection * 0.4F);
+            float sideways = guardedAgainst(target) ? 0.8F : 0.4F; // contourner une garde
+            soldier.getMoveControl().strafe(forward, strafeDirection * sideways);
         }
 
         tryShoot(target, def, sees, distance, now);
@@ -155,6 +161,15 @@ public class SoldierCombatGoal extends Goal {
     private void tryShoot(LivingEntity target, WeaponDefinition def, boolean sees, double distance, long now) {
         if (!sees || seeTime < REACTION_TICKS || burstCooldown > 0) return;
         if (distance > def.range() * 0.9) return;
+        if (guardedAgainst(target)) {
+            // Retient son tir le temps de tenter un contournement, puis met la pression sur la garde.
+            if (guardHoldTicks < guardHoldLimit) {
+                guardHoldTicks++;
+                return;
+            }
+        } else {
+            guardHoldTicks = 0;
+        }
 
         if (burstShotsLeft <= 0) {
             burstShotsLeft = def.fireMode() == FireMode.AUTO
@@ -169,7 +184,13 @@ public class SoldierCombatGoal extends Goal {
                 soldier.getRandom().nextInt(), 0, null);
         if (fired && --burstShotsLeft <= 0) {
             burstCooldown = 20 + soldier.getRandom().nextInt(25);
+            guardHoldTicks = 0;
+            guardHoldLimit = 20 + soldier.getRandom().nextInt(21);
         }
+    }
+
+    private boolean guardedAgainst(LivingEntity target) {
+        return BladeDeflection.isGuardingAgainst(target, soldier.getEyePosition());
     }
 
     /** Imprécision ajoutée selon la difficulté, en degrés. */

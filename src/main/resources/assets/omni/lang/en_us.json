@@ -19,5 +19,9 @@
   "death.attack.omni.blaster.item": "%1$s was shot by %2$s using %3$s",
   "death.attack.omni.blaster.player": "%1$s was shot while fighting %2$s",
   "entity.omni.soldier": "Soldier",
-  "item.omni.soldier_spawn_egg": "Soldier Spawn Egg"
+  "item.omni.soldier_spawn_egg": "Soldier Spawn Egg",
+  "item.omni.energy_blade": "Energy Blade",
+  "tooltip.omni.energy_blade.guard": "Hold right-click: guard (deflects bolts from the front, drains stamina)",
+  "tooltip.omni.energy_blade.parry": "Raise your guard just before impact to send the bolt where you aim",
+  "tooltip.omni.energy_blade.stamina": "Normal parry costs stamina, perfect parry restores it; at zero the guard breaks"
 }

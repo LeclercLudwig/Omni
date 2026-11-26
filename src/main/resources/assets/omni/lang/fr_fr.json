@@ -19,5 +19,9 @@
   "death.attack.omni.blaster.item": "%1$s a été abattu par %2$s avec %3$s",
   "death.attack.omni.blaster.player": "%1$s a été abattu en combattant %2$s",
   "entity.omni.soldier": "Soldat",
-  "item.omni.soldier_spawn_egg": "Œuf d'apparition de soldat"
+  "item.omni.soldier_spawn_egg": "Œuf d'apparition de soldat",
+  "item.omni.energy_blade": "Lame à énergie",
+  "tooltip.omni.energy_blade.guard": "Clic droit maintenu : garde (renvoie les tirs de face, consomme de l'endurance)",
+  "tooltip.omni.energy_blade.parry": "Levez la garde juste avant l'impact pour renvoyer le tir là où vous visez",
+  "tooltip.omni.energy_blade.stamina": "Parade normale : coûte de l'endurance ; parade parfaite : en rend ; à zéro, la garde se brise"
 }

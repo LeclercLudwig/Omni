@@ -2,6 +2,7 @@ package com.omni.entity;
 
 import com.omni.registry.OmniEntities;
 import com.omni.registry.OmniTags;
+import com.omni.weapon.BladeDeflection;
 import com.omni.weapon.BoltType;
 import com.omni.weapon.WeaponDefinition;
 import net.minecraft.core.registries.Registries;
@@ -38,6 +39,9 @@ import net.neoforged.neoforge.event.EventHooks;
 public class BoltEntity extends Projectile {
     private static final EntityDataAccessor<Integer> COLOR =
             SynchedEntityData.defineId(BoltEntity.class, EntityDataSerializers.INT);
+    /** Synchronisé : le propriétaire, lui, n'est envoyé au client qu'à l'apparition du tir. */
+    private static final EntityDataAccessor<Boolean> DEFLECTED =
+            SynchedEntityData.defineId(BoltEntity.class, EntityDataSerializers.BOOLEAN);
 
     private float damage = 5.0F;
     private float headshotMultiplier = 1.5F;
@@ -78,10 +82,29 @@ public class BoltEntity extends Projectile {
     @Override
     protected void defineSynchedData(SynchedEntityData.Builder builder) {
         builder.define(COLOR, 0xFF3B30);
+        builder.define(DEFLECTED, false);
     }
 
     public int getColor() {
         return entityData.get(COLOR);
+    }
+
+    public boolean isDeflected() {
+        return entityData.get(DEFLECTED);
+    }
+
+    /**
+     * Renvoie le tir (parade) : nouveau propriétaire, nouvelle direction, durée de vie
+     * réinitialisée. Côté serveur uniquement ; la nouvelle trajectoire est synchronisée.
+     */
+    public void redirect(Entity newOwner, Vec3 direction, double speedFactor, float damageFactor, float spreadDegrees) {
+        double speed = getDeltaMovement().length() * speedFactor;
+        setOwner(newOwner);
+        damage *= damageFactor;
+        shoot(direction.x, direction.y, direction.z, (float) speed, spreadDegrees);
+        maxLifeTicks = tickCount + maxLifeTicks;
+        entityData.set(DEFLECTED, true);
+        hasImpulse = true;
     }
 
     @Override
@@ -95,6 +118,12 @@ public class BoltEntity extends Projectile {
 
         // Rayon entre la position actuelle et la suivante : pas d'effet tunnel à haute vitesse.
         HitResult hit = ProjectileUtil.getHitResultOnMoveVector(this, this::canHitEntity);
+        // Parade à la lame (serveur) : le tir repart au lieu de toucher.
+        if (!level().isClientSide && hit instanceof EntityHitResult entityHit
+                && entityHit.getEntity() instanceof LivingEntity defender
+                && BladeDeflection.tryDeflect(defender, this)) {
+            return;
+        }
         if (hit.getType() != HitResult.Type.MISS && !EventHooks.onProjectileImpact(this, hit)) {
             ProjectileDeflection deflection = hitTargetOrDeflectSelf(hit);
             if (deflection != ProjectileDeflection.NONE) return; // renvoyé : on continue au tick suivant
@@ -110,9 +139,13 @@ public class BoltEntity extends Projectile {
     protected void onHitEntity(EntityHitResult result) {
         super.onHitEntity(result);
         if (level().isClientSide) {
-            // Côté client, simple effet visuel : les dégâts sont décidés par le serveur.
-            if (predicted) impactEffects(impactPoint(result.getEntity()));
-            discard();
+            // Côté client, simple effet visuel : les dégâts (ou une parade) sont décidés par le
+            // serveur. Seul le tir prédit disparaît tout de suite ; les copies des vrais tirs
+            // attendent le serveur, qui peut les avoir renvoyés.
+            if (predicted) {
+                impactEffects(impactPoint(result.getEntity()));
+                discard();
+            }
             return;
         }
 
@@ -192,7 +225,7 @@ public class BoltEntity extends Projectile {
     @Override
     protected boolean canHitEntity(Entity target) {
         Entity owner = getOwner();
-        if (owner != null && owner.isAlliedTo(target)) return false;
+        if (owner != null && (owner == target || owner.isAlliedTo(target))) return false;
         return super.canHitEntity(target);
     }
 
