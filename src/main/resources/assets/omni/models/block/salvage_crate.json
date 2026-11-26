@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/cube_bottom_top",
+  "textures": {
+    "side": "omni:block/salvage_crate_side",
+    "top": "omni:block/salvage_crate_top",
+    "bottom": "omni:block/wreck_hull"
+  }
+}

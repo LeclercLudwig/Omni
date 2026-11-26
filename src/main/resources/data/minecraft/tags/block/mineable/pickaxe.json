@@ -1,0 +1,7 @@
+{
+  "replace": false,
+  "values": [
+    "omni:diagnostic_bench",
+    "omni:salvage_crate"
+  ]
+}

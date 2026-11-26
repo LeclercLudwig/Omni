@@ -28,6 +28,12 @@ public final class OmniTabs {
                         output.accept(OmniItems.HEAT_SINK.get());
                         output.accept(OmniItems.STOCK.get());
                         output.accept(OmniItems.ENERGY_BLADE.get());
+                        for (var item : new net.minecraft.world.level.ItemLike[]{OmniItems.PLASMA_CUTTER, OmniItems.SCRAP_METAL,
+                                OmniItems.FUEL_CANISTER, OmniItems.POWER_CELL, OmniItems.DIAGNOSTIC_BENCH, OmniItems.WRECK_HULL,
+                                OmniItems.SCORCHED_HULL, OmniItems.FUEL_LINE, OmniItems.REACTOR_CORE, OmniItems.STABLE_REACTOR_CORE,
+                                OmniItems.SALVAGE_CRATE}) {
+                            output.accept(item);
+                        }
                         output.accept(OmniItems.SOLDIER_SPAWN_EGG.get());
                     })
                     .build());

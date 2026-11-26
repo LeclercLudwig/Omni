@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "": {
+      "model": "omni:block/stable_reactor_core"
+    }
+  }
+}

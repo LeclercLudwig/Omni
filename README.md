@@ -23,8 +23,8 @@ Java 21 est téléchargé automatiquement par Gradle si besoin. En jeu : onglet 
 ./gradlew runGameTestServer
 ```
 
-45 GameTests (`gametest/`) vérifient la cadence, la dispersion, la surchauffe, les dégâts,
-les headshots, les effets stun/ion, la prédiction, les munitions, les modes rafale et chargé, la ventilation, les accessoires, le comportement des soldats et la parade. Ils tournent aussi sur GitHub Actions à chaque push.
+56 GameTests (`gametest/`) vérifient la cadence, la dispersion, la surchauffe, les dégâts,
+les headshots, les effets stun/ion, la prédiction, les munitions, les modes rafale et chargé, la ventilation, les accessoires, les épaves et la récupération, le comportement des soldats et la parade. Ils tournent aussi sur GitHub Actions à chaque push.
 
 ## Modes de tir
 
@@ -70,6 +70,31 @@ emplacement revient en main) ; **clic droit main vide** pour en retirer un. Les 
 Sons propres au mod, synthétisés (`assets/omni/sounds`, déclarés dans `sounds.json`) : un tir par arme,
 surchauffe, ventilation, rechargement, clic à vide, charge, impact, parade, garde brisée.
 Remplaçables par un pack de ressources.
+
+## Épaves (pilier ferrailleur)
+
+Des épaves se génèrent dans l'Overworld (plaines, désert, badlands, savane, forêts, taïga…) :
+un **chasseur écrasé** (fréquent) et une **section de cargo** (rare), à demi enterrés dans un sol calciné.
+`/locate structure omni:fighter_wreck` (ou `omni:freighter_wreck`) pour en trouver une.
+
+| Élément | Comportement |
+|---|---|
+| Coque / coque calcinée | quasi indestructible sauf au **chalumeau plasma** → ferraille |
+| Conduite de carburant | **explose** si on la casse sans précaution (et en chaîne) ; découpée **accroupi au chalumeau** → bonbonne de carburant |
+| Réacteur instable | grosse explosion si on le casse ; **clic droit maintenu 3 s au chalumeau** pour le stabiliser → cellule d'énergie |
+| Caisse de récupération | cartouches, ferraille, bonbonne, accessoires et blasters, souvent **endommagés** |
+
+**Pièces endommagées** : un blaster endommagé s'enraye une fois sur trois et disperse ×1,5 ; un accessoire
+endommagé ne se pose pas. Clic droit avec la pièce sur un **banc de diagnostic** pour la recalibrer (2 ferrailles).
+
+Les blasters ne se fabriquent pas : on les trouve dans les épaves ou sur les soldats.
+
+| Recette (sans forme) | Ingrédients |
+|---|---|
+| Chalumeau plasma | 3 fer + bâton de blaze + cartouche de gaz |
+| Banc de diagnostic | bloc de fer + 2 redstone + vitre + 2 ferrailles |
+| 6 cartouches de gaz | bonbonne de carburant + 2 pépites de fer |
+| Lame à énergie | cellule d'énergie + diamant + 2 fer + ferraille |
 
 ## Soldats
 

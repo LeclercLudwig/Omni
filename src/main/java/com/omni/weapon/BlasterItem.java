@@ -43,8 +43,10 @@ public class BlasterItem extends Item {
     public static Optional<WeaponDefinition> definition(boolean clientSide, ItemStack stack) {
         if (!(stack.getItem() instanceof BlasterItem)) return Optional.empty();
         Attachments attachments = attachments(stack);
+        boolean damaged = com.omni.salvage.Damage.isDamaged(stack);
         return WeaponManager.get(clientSide, stack.get(OmniComponents.WEAPON.get()))
-                .map(def -> attachments.isEmpty() ? def : attachments.applyTo(def));
+                .map(def -> attachments.isEmpty() ? def : attachments.applyTo(def))
+                .map(def -> damaged ? def.withSpread(new WeaponDefinition.Spread(def.spread().hip() * 1.5F, def.spread().aim() * 1.5F)) : def);
     }
 
     public static Attachments attachments(ItemStack stack) {
@@ -56,7 +58,9 @@ public class BlasterItem extends Item {
      * @return l'accessoire remplacé dans le même emplacement, ou {@link ItemStack#EMPTY}
      */
     public static ItemStack attach(ItemStack blaster, ItemStack attachment) {
-        if (!(attachment.getItem() instanceof AttachmentItem item)) return ItemStack.EMPTY;
+        if (!(attachment.getItem() instanceof AttachmentItem item) || com.omni.salvage.Damage.isDamaged(attachment)) {
+            return ItemStack.EMPTY;
+        }
         AttachmentType.Slot slot = item.type().slot();
         Attachments current = attachments(blaster);
         ItemStack previous = current.get(slot).map(Attachments::stackOf).orElse(ItemStack.EMPTY);
@@ -90,6 +94,12 @@ public class BlasterItem extends Item {
                                             Player player, SlotAccess carriedAccess) {
         if (action != ClickAction.SECONDARY || !slot.allowModification(player)) return false;
         if (carried.getItem() instanceof AttachmentItem) {
+            if (com.omni.salvage.Damage.isDamaged(carried)) { // à recalibrer d'abord
+                if (player.level().isClientSide) {
+                    player.displayClientMessage(Component.translatable("message.omni.attachment.damaged"), true);
+                }
+                return true;
+            }
             ItemStack previous = attach(blaster, carried);
             if (!previous.isEmpty()) {
                 if (carried.isEmpty()) carriedAccess.set(previous);

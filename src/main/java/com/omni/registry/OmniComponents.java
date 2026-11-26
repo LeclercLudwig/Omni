@@ -44,6 +44,13 @@ public final class OmniComponents {
                     .networkSynchronized(Attachments.STREAM_CODEC)
                     .build());
 
+    /** Pièce récupérée endommagée (blaster ou accessoire) : à recalibrer au banc de diagnostic. */
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<net.minecraft.util.Unit>> DAMAGED =
+            COMPONENTS.register("damaged", () -> DataComponentType.<net.minecraft.util.Unit>builder()
+                    .persistent(net.minecraft.util.Unit.CODEC)
+                    .networkSynchronized(net.minecraft.network.codec.StreamCodec.unit(net.minecraft.util.Unit.INSTANCE))
+                    .build());
+
     /** Endurance de garde de la lame à énergie. */
     public static final DeferredHolder<DataComponentType<?>, DataComponentType<GuardState>> GUARD =
             COMPONENTS.register("guard", () -> DataComponentType.<GuardState>builder()

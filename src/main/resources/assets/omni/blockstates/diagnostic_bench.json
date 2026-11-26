@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "": {
+      "model": "omni:block/diagnostic_bench"
+    }
+  }
+}

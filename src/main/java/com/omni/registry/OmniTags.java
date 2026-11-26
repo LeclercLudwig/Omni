@@ -12,6 +12,10 @@ public final class OmniTags {
     public static final TagKey<EntityType<?>> ION_VULNERABLE =
             TagKey.create(Registries.ENTITY_TYPE, Omni.id("ion_vulnerable"));
 
+    /** Blocs d'épave découpables au chalumeau plasma. */
+    public static final TagKey<net.minecraft.world.level.block.Block> WRECK_BLOCKS =
+            TagKey.create(Registries.BLOCK, Omni.id("wreck_blocks"));
+
     /** Type de dégâts défini dans data/omni/damage_type/blaster.json. */
     public static final ResourceKey<DamageType> BLASTER_DAMAGE =
             ResourceKey.create(Registries.DAMAGE_TYPE, Omni.id("blaster"));

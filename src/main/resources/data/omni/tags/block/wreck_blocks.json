@@ -1,0 +1,9 @@
+{
+  "values": [
+    "omni:wreck_hull",
+    "omni:scorched_hull",
+    "omni:fuel_line",
+    "omni:reactor_core",
+    "omni:stable_reactor_core"
+  ]
+}

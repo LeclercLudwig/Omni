@@ -166,7 +166,7 @@ public final class ClientWeaponControls {
         // Même graine des deux côtés : le tir prédit suit exactement la trajectoire du vrai.
         int seed = RANDOM.nextInt();
         PacketDistributor.sendToServer(new FirePayload(aiming, seed, chargeTicks));
-        ClientPrediction.predictShot(player, mc.level, stack, def, aiming, seed, chargeFactor);
+        boolean fired = ClientPrediction.predictShot(player, mc.level, stack, def, aiming, seed, chargeFactor);
         // Prochaine échéance, calculée en temps client : intervalle court au sein d'une rafale.
         long delay = def.fireDelayTicks();
         if (def.fireMode() == FireMode.BURST && ++burstFired < def.firing().burst().count()) {
@@ -174,7 +174,7 @@ public final class ClientWeaponControls {
         }
         localNextShot = now + delay;
         float recoilFactor = def.fireMode() == FireMode.CHARGED ? 0.5F + chargeFactor : 1.0F;
-        applyRecoil(def, aiming, recoilFactor);
+        if (fired) applyRecoil(def, aiming, recoilFactor); // pas de recul sur un enrayement
     }
 
     // --- Tir chargé --------------------------------------------------------------------------

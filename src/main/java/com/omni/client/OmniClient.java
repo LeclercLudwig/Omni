@@ -28,6 +28,12 @@ public class OmniClient {
         NeoForge.EVENT_BUS.addListener(ClientWeaponControls::onComputeFov);
         NeoForge.EVENT_BUS.addListener(ClientWeaponControls::onPlayerTurn);
         NeoForge.EVENT_BUS.addListener(RecoilController::onRenderFrame);
+        NeoForge.EVENT_BUS.addListener((net.neoforged.neoforge.event.entity.player.ItemTooltipEvent event) -> {
+            if (com.omni.salvage.Damage.isDamaged(event.getItemStack())) {
+                event.getToolTip().add(1, net.minecraft.network.chat.Component.translatable("tooltip.omni.damaged")
+                        .withStyle(net.minecraft.ChatFormatting.RED));
+            }
+        });
     }
 
     private static void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {

@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/cube_bottom_top",
+  "textures": {
+    "side": "omni:block/diagnostic_bench_side",
+    "top": "omni:block/diagnostic_bench_top",
+    "bottom": "omni:block/wreck_hull"
+  }
+}

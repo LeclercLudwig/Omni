@@ -91,6 +91,15 @@ public final class BlasterLogic {
         MagazineState magazine = BlasterItem.magazine(stack);
         if (magazine.isReloading(def, now) || magazine.roundsAt(def, now) <= 0) return false;
 
+        // Arme endommagée : enrayement (la munition et la chaleur sont quand même consommées).
+        if (com.omni.salvage.Damage.isDamaged(stack) && com.omni.salvage.Damage.isMisfire(seed)) {
+            stack.set(OmniComponents.STATE.get(), state.afterShot(def, now));
+            if (def.magazine().isPresent()) stack.set(OmniComponents.MAGAZINE.get(), magazine.afterShot(def, now));
+            level.playSound(soundExcluded, shooter.getX(), shooter.getEyeY(), shooter.getZ(),
+                    OmniSounds.DRY_FIRE.get(), shooter instanceof Player ? SoundSource.PLAYERS : SoundSource.HOSTILE, 0.9F, 0.8F);
+            return true;
+        }
+
         for (Vec3 dir : shotDirections(direction, spreadDegrees, def.projectilesPerShot(), seed)) {
             BoltEntity bolt = new BoltEntity(level, shooter, def, chargeFactor);
             bolt.shoot(dir.x, dir.y, dir.z, def.boltSpeed(), 0);

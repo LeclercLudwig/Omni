@@ -3,6 +3,7 @@ package com.omni;
 import com.mojang.logging.LogUtils;
 import com.omni.entity.SoldierEntity;
 import com.omni.network.OmniNetwork;
+import com.omni.registry.OmniBlocks;
 import com.omni.registry.OmniComponents;
 import com.omni.registry.OmniEntities;
 import com.omni.registry.OmniItems;
@@ -32,6 +33,7 @@ public class Omni {
 
     public Omni(IEventBus modBus) {
         OmniComponents.COMPONENTS.register(modBus);
+        OmniBlocks.BLOCKS.register(modBus);
         OmniItems.ITEMS.register(modBus);
         OmniEntities.ENTITIES.register(modBus);
         OmniTabs.TABS.register(modBus);

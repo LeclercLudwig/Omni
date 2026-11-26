@@ -1,0 +1,244 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "omni:gas_cartridge",
+          "functions": [
+            {
+              "function": "minecraft:set_count",
+              "count": {
+                "type": "minecraft:uniform",
+                "min": 2,
+                "max": 6
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "omni:scrap_metal",
+          "functions": [
+            {
+              "function": "minecraft:set_count",
+              "count": {
+                "type": "minecraft:uniform",
+                "min": 1,
+                "max": 4
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "omni:fuel_canister"
+        }
+      ],
+      "conditions": [
+        {
+          "condition": "minecraft:random_chance",
+          "chance": 0.4
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "omni:scope",
+          "functions": [
+            {
+              "function": "minecraft:set_components",
+              "components": {
+                "omni:damaged": {}
+              }
+            }
+          ],
+          "weight": 3
+        },
+        {
+          "type": "minecraft:item",
+          "name": "omni:stabilizer",
+          "functions": [
+            {
+              "function": "minecraft:set_components",
+              "components": {
+                "omni:damaged": {}
+              }
+            }
+          ],
+          "weight": 3
+        },
+        {
+          "type": "minecraft:item",
+          "name": "omni:heat_sink",
+          "functions": [
+            {
+              "function": "minecraft:set_components",
+              "components": {
+                "omni:damaged": {}
+              }
+            }
+          ],
+          "weight": 3
+        },
+        {
+          "type": "minecraft:item",
+          "name": "omni:stock",
+          "functions": [
+            {
+              "function": "minecraft:set_components",
+              "components": {
+                "omni:damaged": {}
+              }
+            }
+          ],
+          "weight": 3
+        }
+      ],
+      "conditions": [
+        {
+          "condition": "minecraft:random_chance",
+          "chance": 0.3
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "omni:blaster",
+          "functions": [
+            {
+              "function": "minecraft:set_components",
+              "components": {
+                "omni:weapon": "omni:blaster_pistol",
+                "omni:damaged": {}
+              }
+            }
+          ],
+          "weight": 6
+        },
+        {
+          "type": "minecraft:item",
+          "name": "omni:blaster",
+          "functions": [
+            {
+              "function": "minecraft:set_components",
+              "components": {
+                "omni:weapon": "omni:blaster_rifle",
+                "omni:damaged": {}
+              }
+            }
+          ],
+          "weight": 5
+        },
+        {
+          "type": "minecraft:item",
+          "name": "omni:blaster",
+          "functions": [
+            {
+              "function": "minecraft:set_components",
+              "components": {
+                "omni:weapon": "omni:burst_carbine",
+                "omni:damaged": {}
+              }
+            }
+          ],
+          "weight": 3
+        },
+        {
+          "type": "minecraft:item",
+          "name": "omni:blaster",
+          "functions": [
+            {
+              "function": "minecraft:set_components",
+              "components": {
+                "omni:weapon": "omni:scatter_blaster",
+                "omni:damaged": {}
+              }
+            }
+          ],
+          "weight": 3
+        },
+        {
+          "type": "minecraft:item",
+          "name": "omni:blaster",
+          "functions": [
+            {
+              "function": "minecraft:set_components",
+              "components": {
+                "omni:weapon": "omni:stun_pistol",
+                "omni:damaged": {}
+              }
+            }
+          ],
+          "weight": 3
+        },
+        {
+          "type": "minecraft:item",
+          "name": "omni:blaster",
+          "functions": [
+            {
+              "function": "minecraft:set_components",
+              "components": {
+                "omni:weapon": "omni:ion_carbine",
+                "omni:damaged": {}
+              }
+            }
+          ],
+          "weight": 2
+        },
+        {
+          "type": "minecraft:item",
+          "name": "omni:blaster",
+          "functions": [
+            {
+              "function": "minecraft:set_components",
+              "components": {
+                "omni:weapon": "omni:heavy_repeater",
+                "omni:damaged": {}
+              }
+            }
+          ],
+          "weight": 1
+        },
+        {
+          "type": "minecraft:item",
+          "name": "omni:blaster",
+          "functions": [
+            {
+              "function": "minecraft:set_components",
+              "components": {
+                "omni:weapon": "omni:marksman_rifle",
+                "omni:damaged": {}
+              }
+            }
+          ],
+          "weight": 1
+        }
+      ],
+      "conditions": [
+        {
+          "condition": "minecraft:random_chance",
+          "chance": 0.25
+        }
+      ]
+    }
+  ]
+}

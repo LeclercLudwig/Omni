@@ -7,6 +7,7 @@ import com.omni.registry.OmniComponents;
 import com.omni.weapon.BlasterItem;
 import com.omni.weapon.BlasterLogic;
 import com.omni.network.ReloadPayload;
+import com.omni.salvage.Damage;
 import com.omni.network.VentPayload;
 import com.omni.weapon.BlasterState;
 import com.omni.weapon.MagazineState;
@@ -40,8 +41,19 @@ public final class ClientPrediction {
 
     private ClientPrediction() {}
 
-    public static void predictShot(LocalPlayer player, ClientLevel level, ItemStack stack, WeaponDefinition def,
-                                   boolean aiming, int seed, float chargeFactor) {
+    /** @return false si l'arme s'est enrayée (aucun tir, pas de recul) */
+    public static boolean predictShot(LocalPlayer player, ClientLevel level, ItemStack stack, WeaponDefinition def,
+                                      boolean aiming, int seed, float chargeFactor) {
+        if (Damage.isDamaged(stack) && Damage.isMisfire(seed)) {
+            long now = level.getGameTime();
+            stack.set(OmniComponents.STATE.get(), BlasterItem.state(stack).afterShot(def, now));
+            if (def.magazine().isPresent()) {
+                stack.set(OmniComponents.MAGAZINE.get(), BlasterItem.magazine(stack).afterShot(def, now));
+            }
+            level.playLocalSound(player.getX(), player.getEyeY(), player.getZ(),
+                    OmniSounds.DRY_FIRE.get(), SoundSource.PLAYERS, 0.9F, 0.8F, false);
+            return false;
+        }
         for (Vec3 direction : BlasterLogic.shotDirections(player.getLookAngle(), def, aiming, seed)) {
             BoltEntity bolt = BoltEntity.predicted(level, player, def, chargeFactor);
             bolt.shoot(direction.x, direction.y, direction.z, def.boltSpeed(), 0);
@@ -64,6 +76,7 @@ public final class ClientPrediction {
             level.playLocalSound(player.getX(), player.getEyeY(), player.getZ(),
                     OmniSounds.OVERHEAT.get(), SoundSource.PLAYERS, 0.8F, 1.0F, false);
         }
+        return true;
     }
 
     /**
