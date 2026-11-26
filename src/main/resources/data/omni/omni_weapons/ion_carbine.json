@@ -7,5 +7,6 @@
   "fire_delay_ticks": 6,
   "heat": { "per_shot": 12, "max": 100, "cooling_per_tick": 1.4 },
   "bolt_color": "#7FE7FF",
-  "fire_sound": "minecraft:block.respawn_anchor.charge"
+  "fire_sound": "minecraft:block.respawn_anchor.charge",
+  "magazine": { "capacity": 10, "reload_ticks": 40 }
 }

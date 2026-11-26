@@ -10,5 +10,6 @@
   "aim_fov_multiplier": 0.3,
   "headshot_multiplier": 2.0,
   "bolt_color": "#FF2020",
-  "fire_sound": "minecraft:entity.firework_rocket.large_blast"
+  "fire_sound": "minecraft:entity.firework_rocket.large_blast",
+  "magazine": { "capacity": 5, "reload_ticks": 50 }
 }

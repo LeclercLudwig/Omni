@@ -10,6 +10,8 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
@@ -72,6 +74,8 @@ public final class BlasterLogic {
         long now = level.getGameTime();
         BlasterState state = BlasterItem.state(stack);
         if (!state.canFire(def, now, jitterTolerance)) return false;
+        MagazineState magazine = BlasterItem.magazine(stack);
+        if (magazine.isReloading(def, now) || magazine.roundsAt(def, now) <= 0) return false;
 
         for (Vec3 dir : shotDirections(direction, spreadDegrees, def.projectilesPerShot(), seed)) {
             BoltEntity bolt = new BoltEntity(level, shooter, def);
@@ -81,6 +85,7 @@ public final class BlasterLogic {
 
         BlasterState next = state.afterShot(def, now);
         stack.set(OmniComponents.STATE.get(), next);
+        if (def.magazine().isPresent()) stack.set(OmniComponents.MAGAZINE.get(), magazine.afterShot(def, now));
 
         SoundSource source = shooter instanceof Player ? SoundSource.PLAYERS : SoundSource.HOSTILE;
         float pitch = 0.9F + level.random.nextFloat() * 0.2F;
@@ -112,6 +117,59 @@ public final class BlasterLogic {
             // Le client avait prédit ce tir : on lui renvoie l'état réel de l'arme (chaleur).
             resync(player, player.level().getGameTime());
         }
+    }
+
+    /**
+     * Lance le rechargement de l'arme {@code stack}.
+     *
+     * @param ammoSource joueur dont on consomme une munition, ou null (créature : munitions illimitées)
+     * @return true si le rechargement a commencé
+     */
+    public static boolean tryReload(LivingEntity shooter, ItemStack stack, @Nullable Player ammoSource,
+                                    @Nullable Player soundExcluded) {
+        WeaponDefinition def = BlasterItem.definition(shooter.level().isClientSide, stack).orElse(null);
+        if (def == null || def.magazine().isEmpty()) return false;
+        long now = shooter.level().getGameTime();
+        MagazineState magazine = BlasterItem.magazine(stack);
+        if (!magazine.canStartReload(def, now)) return false;
+        if (ammoSource != null && !ammoSource.hasInfiniteMaterials() && !consumeAmmo(ammoSource, def.magazine().get())) {
+            return false;
+        }
+
+        stack.set(OmniComponents.MAGAZINE.get(), magazine.startReload(def, now));
+        SoundSource source = shooter instanceof Player ? SoundSource.PLAYERS : SoundSource.HOSTILE;
+        shooter.level().playSound(soundExcluded, shooter.getX(), shooter.getEyeY(), shooter.getZ(),
+                SoundEvents.CROSSBOW_LOADING_START.value(), source, 0.9F, 0.8F);
+        return true;
+    }
+
+    /** Rechargement demandé par un joueur (paquet {@code ReloadPayload}). */
+    public static void tryReload(ServerPlayer player) {
+        if (player.isSpectator()) return;
+        if (!tryReload(player, player.getMainHandItem(), player, player)) {
+            resync(player, player.level().getGameTime()); // le client avait prédit le rechargement
+        }
+    }
+
+    public static int countAmmo(Player player, WeaponDefinition.Magazine magazine) {
+        Item ammo = BuiltInRegistries.ITEM.get(magazine.ammo());
+        int count = 0;
+        for (ItemStack stack : player.getInventory().items) if (stack.is(ammo)) count += stack.getCount();
+        for (ItemStack stack : player.getInventory().offhand) if (stack.is(ammo)) count += stack.getCount();
+        return count;
+    }
+
+    private static boolean consumeAmmo(Player player, WeaponDefinition.Magazine magazine) {
+        Item ammo = BuiltInRegistries.ITEM.get(magazine.ammo());
+        for (var list : java.util.List.of(player.getInventory().offhand, player.getInventory().items)) {
+            for (ItemStack stack : list) {
+                if (stack.is(ammo)) {
+                    stack.shrink(1);
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     private static void resync(ServerPlayer player, long now) {

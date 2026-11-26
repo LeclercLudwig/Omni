@@ -23,6 +23,13 @@ public final class OmniNetwork {
                     }
                 }));
 
+        registrar.playToServer(ReloadPayload.TYPE, ReloadPayload.STREAM_CODEC, (payload, context) ->
+                context.enqueueWork(() -> {
+                    if (context.player() instanceof ServerPlayer player) {
+                        BlasterLogic.tryReload(player);
+                    }
+                }));
+
         registrar.playToClient(SyncWeaponsPayload.TYPE, SyncWeaponsPayload.STREAM_CODEC, (payload, context) ->
                 context.enqueueWork(() -> WeaponManager.setClientWeapons(payload.weapons())));
     }

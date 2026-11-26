@@ -38,6 +38,10 @@ public class BlasterItem extends Item {
         return WeaponManager.get(clientSide, stack.get(OmniComponents.WEAPON.get()));
     }
 
+    public static MagazineState magazine(ItemStack stack) {
+        return stack.getOrDefault(OmniComponents.MAGAZINE.get(), MagazineState.FULL);
+    }
+
     public static BlasterState state(ItemStack stack) {
         return stack.getOrDefault(OmniComponents.STATE.get(), BlasterState.EMPTY);
     }
@@ -74,6 +78,8 @@ public class BlasterItem extends Item {
                     .withStyle(ChatFormatting.GRAY));
             tooltip.add(Component.translatable("tooltip.omni.bolt_type." + def.boltType().getSerializedName())
                     .withStyle(ChatFormatting.DARK_AQUA));
+            def.magazine().ifPresent(mag -> tooltip.add(Component.translatable("tooltip.omni.magazine",
+                    mag.capacity(), String.format("%.1f", mag.reloadTicks() / 20.0)).withStyle(ChatFormatting.GRAY)));
         });
     }
 }

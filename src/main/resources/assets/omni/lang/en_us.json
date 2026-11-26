@@ -23,5 +23,10 @@
   "item.omni.energy_blade": "Energy Blade",
   "tooltip.omni.energy_blade.guard": "Hold right-click: guard (deflects bolts from the front, drains stamina)",
   "tooltip.omni.energy_blade.parry": "Raise your guard just before impact to send the bolt where you aim",
-  "tooltip.omni.energy_blade.stamina": "Normal parry costs stamina, perfect parry restores it; at zero the guard breaks"
+  "tooltip.omni.energy_blade.stamina": "Normal parry costs stamina, perfect parry restores it; at zero the guard breaks",
+  "item.omni.gas_cartridge": "Gas Cartridge",
+  "tooltip.omni.magazine": "Magazine: %s shots, reload %ss",
+  "key.omni.reload": "Reload blaster",
+  "key.categories.omni": "Omni",
+  "message.omni.no_ammo": "No ammunition left"
 }

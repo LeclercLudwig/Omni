@@ -3,6 +3,7 @@ package com.omni.registry;
 import com.omni.Omni;
 import com.omni.weapon.BlasterState;
 import com.omni.weapon.GuardState;
+import com.omni.weapon.MagazineState;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
@@ -26,6 +27,13 @@ public final class OmniComponents {
             COMPONENTS.register("state", () -> DataComponentType.<BlasterState>builder()
                     .persistent(BlasterState.CODEC)
                     .networkSynchronized(BlasterState.STREAM_CODEC)
+                    .build());
+
+    /** Contenu du chargeur et rechargement en cours. */
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<MagazineState>> MAGAZINE =
+            COMPONENTS.register("magazine", () -> DataComponentType.<MagazineState>builder()
+                    .persistent(MagazineState.CODEC)
+                    .networkSynchronized(MagazineState.STREAM_CODEC)
                     .build());
 
     /** Endurance de garde de la lame à énergie. */

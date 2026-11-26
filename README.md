@@ -23,8 +23,18 @@ Java 21 est téléchargé automatiquement par Gradle si besoin. En jeu : onglet 
 ./gradlew runGameTestServer
 ```
 
-24 GameTests (`gametest/`) vérifient la cadence, la dispersion, la surchauffe, les dégâts,
-les headshots, les effets stun/ion, la prédiction, le comportement des soldats et la parade. Ils tournent aussi sur GitHub Actions à chaque push.
+32 GameTests (`gametest/`) vérifient la cadence, la dispersion, la surchauffe, les dégâts,
+les headshots, les effets stun/ion, la prédiction, les munitions, le comportement des soldats et la parade. Ils tournent aussi sur GitHub Actions à chaque push.
+
+## Munitions
+
+Chaque arme a un chargeur (bloc `"magazine"` du JSON : capacité, durée de rechargement, munition) :
+
+- **R** (modifiable dans Options → Commandes) : recharger ; un chargeur vide se recharge tout seul au tir ;
+- un rechargement consomme une **cartouche de gaz** (gratuit en créatif) : 4 cartouches = lingot de fer
+  + poudre à canon + poudre de glowstone ; les soldats en lâchent 0 à 2 ;
+- compteur « tirs/capacité ×réserve » sous le réticule, barre de rechargement, arme qui s'abaisse ;
+- les soldats rechargent (munitions illimitées) en se mettant à couvert.
 
 ## Soldats
 
@@ -70,7 +80,8 @@ Seul `damage` est obligatoire (les commentaires ci-dessous sont explicatifs, à 
   "aim_fov_multiplier": 0.75,       // 0.3 = lunette
   "headshot_multiplier": 1.5,
   "bolt_color": "#FF3B30",
-  "fire_sound": "minecraft:entity.firework_rocket.blast"
+  "fire_sound": "minecraft:entity.firework_rocket.blast",
+  "magazine": { "capacity": 30, "reload_ticks": 45, "ammo": "omni:gas_cartridge" }  // absent = illimité
 }
 ```
 
@@ -97,7 +108,7 @@ Le serveur fait autorité : le client ne fait qu'envoyer « je tire » et pré-f
 - Prédiction client : afficher le tir immédiatement côté tireur, avant la réponse du serveur
 - Recul lissé sur plusieurs frames au lieu d'un à-coup instantané
 - Modes `burst` et `charged` (tir chargé du sniper)
-- Cartouches de gaz (munitions) et refroidissement actif (QTE)
+- Refroidissement actif (QTE)
 - Vrais sons (`sounds.json` + `.ogg`) et modèles Blockbench
 
 ## Licence

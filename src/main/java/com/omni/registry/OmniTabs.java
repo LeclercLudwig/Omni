@@ -22,6 +22,7 @@ public final class OmniTabs {
                     .icon(() -> BlasterItem.create(Omni.id("blaster_rifle")))
                     .displayItems((params, output) -> {
                         WeaponManager.all(true).keySet().forEach(id -> output.accept(BlasterItem.create(id)));
+                        output.accept(OmniItems.GAS_CARTRIDGE.get());
                         output.accept(OmniItems.ENERGY_BLADE.get());
                         output.accept(OmniItems.SOLDIER_SPAWN_EGG.get());
                     })

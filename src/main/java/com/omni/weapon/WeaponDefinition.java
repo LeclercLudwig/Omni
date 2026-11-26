@@ -8,6 +8,8 @@ import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
 
+import java.util.Optional;
+
 /**
  * Une arme, telle que décrite dans data/&lt;namespace&gt;/omni_weapons/&lt;nom&gt;.json.
  * Tous les champs sauf {@code damage} ont une valeur par défaut.
@@ -26,8 +28,22 @@ public record WeaponDefinition(
         float aimFovMultiplier,
         float headshotMultiplier,
         int boltColor,
-        ResourceLocation fireSound
+        ResourceLocation fireSound,
+        Optional<Magazine> magazine
 ) {
+    /**
+     * Chargeur : {@code capacity} tirs, rechargé en {@code reload_ticks} en consommant un
+     * objet {@code ammo}. Sans bloc "magazine", l'arme a des munitions illimitées.
+     */
+    public record Magazine(int capacity, int reloadTicks, ResourceLocation ammo) {
+        public static final ResourceLocation DEFAULT_AMMO = ResourceLocation.fromNamespaceAndPath("omni", "gas_cartridge");
+        public static final Codec<Magazine> CODEC = RecordCodecBuilder.create(i -> i.group(
+                Codec.intRange(1, 1000).fieldOf("capacity").forGetter(Magazine::capacity),
+                Codec.intRange(1, 1200).optionalFieldOf("reload_ticks", 40).forGetter(Magazine::reloadTicks),
+                ResourceLocation.CODEC.optionalFieldOf("ammo", DEFAULT_AMMO).forGetter(Magazine::ammo)
+        ).apply(i, Magazine::new));
+    }
+
     /** Dispersion en degrés (approximatifs), à la hanche et en visée. */
     public record Spread(float hip, float aim) {
         public static final Spread DEFAULT = new Spread(3.0F, 0.75F);
@@ -83,7 +99,8 @@ public record WeaponDefinition(
             Codec.floatRange(1F, 10F).optionalFieldOf("headshot_multiplier", 1.5F).forGetter(WeaponDefinition::headshotMultiplier),
             HEX_COLOR.optionalFieldOf("bolt_color", 0xFF3B30).forGetter(WeaponDefinition::boltColor),
             ResourceLocation.CODEC.optionalFieldOf("fire_sound", ResourceLocation.withDefaultNamespace("entity.firework_rocket.blast"))
-                    .forGetter(WeaponDefinition::fireSound)
+                    .forGetter(WeaponDefinition::fireSound),
+            Magazine.CODEC.optionalFieldOf("magazine").forGetter(WeaponDefinition::magazine)
     ).apply(i, WeaponDefinition::new));
 
     /** Pour la synchro serveur → client (passe par NBT, largement suffisant pour quelques armes). */

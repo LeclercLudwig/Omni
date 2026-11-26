@@ -6,6 +6,7 @@ import com.omni.weapon.BlasterItem;
 import com.omni.weapon.BlasterLogic;
 import com.omni.weapon.BlasterState;
 import com.omni.weapon.FireMode;
+import com.omni.weapon.MagazineState;
 import com.omni.weapon.WeaponDefinition;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.goal.Goal;
@@ -25,8 +26,8 @@ import java.util.EnumSet;
  *       réaction). Face à une garde (lame à énergie), il retient son tir 1 à 2 s en se décalant
  *       vite pour la contourner, puis tire quand même pour l'épuiser (chaque parade coûte de
  *       l'endurance à la cible).</li>
- *   <li><b>COVER</b> : arme en surchauffe ou blessure → cherche une position hors de vue de la
- *       cible (à défaut, recule), attend que l'arme refroidisse, puis repart à l'assaut.</li>
+ *   <li><b>COVER</b> : arme en surchauffe, chargeur vide ou blessure → cherche une position hors
+ *       de vue de la cible (à défaut, recule), recharge et laisse refroidir, puis repart à l'assaut.</li>
  * </ul>
  */
 public class SoldierCombatGoal extends Goal {
@@ -120,7 +121,14 @@ public class SoldierCombatGoal extends Goal {
         long now = soldier.level().getGameTime();
         BlasterState state = BlasterItem.state(soldier.weapon());
         float heatRatio = state.heatAt(def, now) / def.heat().max();
-        boolean hot = state.overheatedAt(def, now) || heatRatio >= HOT_RATIO;
+
+        // Chargeur vide : recharge (munitions illimitées pour les créatures) et se met à couvert.
+        MagazineState magazine = BlasterItem.magazine(soldier.weapon());
+        if (magazine.roundsAt(def, now) <= 0) BlasterLogic.tryReload(soldier, soldier.weapon(), null, null);
+        boolean reloading = BlasterItem.magazine(soldier.weapon()).isReloading(def, now);
+
+        // "hot" = arme indisponible pour l'instant (surchauffe ou rechargement).
+        boolean hot = state.overheatedAt(def, now) || heatRatio >= HOT_RATIO || reloading;
 
         if (mode == Mode.ENGAGE) {
             boolean hurt = soldier.getHealth() < soldier.getMaxHealth() * 0.4F && hurtCoverCooldown == 0;
@@ -217,6 +225,12 @@ public class SoldierCombatGoal extends Goal {
 
     private void cover(LivingEntity target, WeaponDefinition def, boolean sees, boolean hot, float heatRatio, long now) {
         coverTicks++;
+
+        // À l'abri, il en profite pour recharger un chargeur à moitié vide.
+        if (!sees && def.magazine().isPresent()
+                && BlasterItem.magazine(soldier.weapon()).roundsAt(def, now) <= def.magazine().get().capacity() / 2) {
+            BlasterLogic.tryReload(soldier, soldier.weapon(), null, null);
+        }
 
         // Pas de couvert trouvé (ou atteint) et toujours exposé : on recule en se décalant.
         if (soldier.getNavigation().isDone() && sees) {

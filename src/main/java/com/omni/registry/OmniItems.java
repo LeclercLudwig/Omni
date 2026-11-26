@@ -18,6 +18,9 @@ public final class OmniItems {
     public static final DeferredItem<BlasterItem> BLASTER =
             ITEMS.register("blaster", () -> new BlasterItem(new Item.Properties().stacksTo(1)));
 
+    /** Munition par défaut des blasters (voir "magazine" dans les JSON d'armes). */
+    public static final DeferredItem<Item> GAS_CARTRIDGE = ITEMS.registerSimpleItem("gas_cartridge", new Item.Properties().stacksTo(16));
+
     public static final DeferredItem<EnergyBladeItem> ENERGY_BLADE =
             ITEMS.register("energy_blade", () -> new EnergyBladeItem(new Item.Properties()));
 

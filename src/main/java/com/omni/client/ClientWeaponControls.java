@@ -4,9 +4,12 @@ import com.omni.network.FirePayload;
 import com.omni.weapon.BlasterItem;
 import com.omni.weapon.BlasterState;
 import com.omni.weapon.FireMode;
+import com.omni.weapon.MagazineState;
 import com.omni.weapon.WeaponDefinition;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.ItemStack;
@@ -71,6 +74,13 @@ public final class ClientWeaponControls {
         boolean aiming = canAct && mc.options.keyUse.isDown();
         aimProgress = Mth.clamp(aimProgress + (aiming ? AIM_STEP : -AIM_STEP), 0, 1);
 
+        long now = mc.level.getGameTime();
+        trackReloadCompletion(player, stack, held.orElse(null), now);
+
+        while (OmniKeys.RELOAD.consumeClick()) {
+            if (canAct) ClientPrediction.requestReload(player, mc.level, stack, held.get(), true);
+        }
+
         boolean attackDown = canAct && mc.options.keyAttack.isDown();
         boolean justPressed = attackDown && !attackWasDown;
         attackWasDown = attackDown;
@@ -79,9 +89,16 @@ public final class ClientWeaponControls {
         WeaponDefinition def = held.get();
         if (def.fireMode() == FireMode.SEMI && !justPressed) return;
 
+        // Chargeur : pas de tir pendant un rechargement ; vide → rechargement automatique.
+        MagazineState magazine = BlasterItem.magazine(stack);
+        if (magazine.isReloading(def, now)) return;
+        if (magazine.roundsAt(def, now) <= 0) {
+            ClientPrediction.requestReload(player, mc.level, stack, def, justPressed);
+            return;
+        }
+
         // Pré-filtrage local (le serveur revérifie tout) : évite de spammer des paquets
         // et de déclencher le recul pour des tirs qui seraient refusés.
-        long now = mc.level.getGameTime();
         BlasterState state = BlasterItem.state(stack);
         if (state.overheatedAt(def, now)) return;
         if (now >= lastLocalShot && now - lastLocalShot < def.fireDelayTicks()) return;
@@ -92,6 +109,18 @@ public final class ClientWeaponControls {
         PacketDistributor.sendToServer(new FirePayload(aiming, seed));
         ClientPrediction.predictShot(player, mc.level, stack, def, aiming, seed);
         applyRecoil(def, aiming);
+    }
+
+    private static boolean wasReloading;
+
+    /** Son local de fin de rechargement (le rechargement se termine « à la lecture », sans paquet). */
+    private static void trackReloadCompletion(LocalPlayer player, ItemStack stack, WeaponDefinition def, long now) {
+        boolean reloading = def != null && BlasterItem.magazine(stack).isReloading(def, now);
+        if (wasReloading && !reloading && def != null) {
+            player.level().playLocalSound(player.getX(), player.getEyeY(), player.getZ(),
+                    SoundEvents.CROSSBOW_LOADING_END.value(), SoundSource.PLAYERS, 0.9F, 1.1F, false);
+        }
+        wasReloading = reloading;
     }
 
     private static void applyRecoil(WeaponDefinition def, boolean aiming) {

@@ -1,16 +1,19 @@
 package com.omni.client;
 
 import com.omni.weapon.BlasterItem;
+import com.omni.weapon.BlasterLogic;
 import com.omni.weapon.BlasterState;
 import com.omni.weapon.EnergyBladeItem;
 import com.omni.weapon.GuardState;
+import com.omni.weapon.MagazineState;
+import com.omni.weapon.WeaponDefinition;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.util.FastColor;
 import net.minecraft.world.item.ItemStack;
 
-/** Jauges sous le réticule : chaleur du blaster, ou endurance de garde de la lame. */
+/** Sous le réticule : chaleur et munitions du blaster, ou endurance de garde de la lame. */
 public final class HeatHud {
     private static final int WIDTH = 32;
     private static final int HEIGHT = 3;
@@ -30,6 +33,8 @@ public final class HeatHud {
         }
 
         BlasterItem.definition(true, stack).ifPresent(def -> {
+            renderAmmo(graphics, mc, stack, def, now, delta.getGameTimeDeltaPartialTick(false));
+
             BlasterState state = BlasterItem.state(stack);
             float ratio = state.heatAt(def, now) / def.heat().max();
             boolean overheated = state.overheatedAt(def, now);
@@ -40,6 +45,28 @@ public final class HeatHud {
                     : FastColor.ARGB32.lerp(ratio, 0xFFFFD040, 0xFFFF4020);
             bar(graphics, ratio, color);
         });
+    }
+
+    /** Munitions sous la jauge : « 24/30 ×5 » (×N = munitions en réserve), ou barre de rechargement. */
+    private static void renderAmmo(GuiGraphics graphics, Minecraft mc, ItemStack stack, WeaponDefinition def,
+                                   long now, float partialTick) {
+        if (def.magazine().isEmpty()) return;
+        WeaponDefinition.Magazine magazine = def.magazine().get();
+        MagazineState state = BlasterItem.magazine(stack);
+        int y = graphics.guiHeight() / 2 + 16;
+
+        if (state.isReloading(def, now)) {
+            int x = graphics.guiWidth() / 2 - WIDTH / 2;
+            graphics.fill(x - 1, y - 1, x + WIDTH + 1, y + 2, 0x90000000);
+            graphics.fill(x, y, x + Math.round(WIDTH * state.reloadProgress(def, now, partialTick)), y + 1, 0xFFE8E8E8);
+            return;
+        }
+
+        int rounds = state.roundsAt(def, now);
+        String text = rounds + "/" + magazine.capacity();
+        if (!mc.player.hasInfiniteMaterials()) text += "  ×" + BlasterLogic.countAmmo(mc.player, magazine);
+        int color = rounds == 0 ? 0xFFFF5050 : rounds <= magazine.capacity() / 4 ? 0xFFFFB040 : 0xFFE8E8E8;
+        graphics.drawString(mc.font, text, graphics.guiWidth() / 2 - mc.font.width(text) / 2, y, color, true);
     }
 
     private static void renderGuard(GuiGraphics graphics, GuardState guard, long now) {
