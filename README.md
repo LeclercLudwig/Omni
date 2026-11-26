@@ -23,8 +23,8 @@ Java 21 est téléchargé automatiquement par Gradle si besoin. En jeu : onglet 
 ./gradlew runGameTestServer
 ```
 
-56 GameTests (`gametest/`) vérifient la cadence, la dispersion, la surchauffe, les dégâts,
-les headshots, les effets stun/ion, la prédiction, les munitions, les modes rafale et chargé, la ventilation, les accessoires, les épaves et la récupération, le comportement des soldats et la parade. Ils tournent aussi sur GitHub Actions à chaque push.
+59 GameTests (`gametest/`) vérifient la cadence, la dispersion, la surchauffe, les dégâts,
+les headshots, les effets stun/ion, la prédiction, les munitions, les modes rafale et chargé, la ventilation, les accessoires, les épaves et la récupération, la planète Khessar, le comportement des soldats et la parade. Ils tournent aussi sur GitHub Actions à chaque push.
 
 ## Modes de tir
 
@@ -70,6 +70,22 @@ emplacement revient en main) ; **clic droit main vide** pour en retirer un. Les 
 Sons propres au mod, synthétisés (`assets/omni/sounds`, déclarés dans `sounds.json`) : un tir par arme,
 surchauffe, ventilation, rechargement, clic à vide, charge, impact, parade, garde brisée.
 Remplaçables par un pack de ressources.
+
+## Khessar, la planète de départ
+
+À sa première connexion, le joueur se réveille sur **Khessar**, un désert de rouille jonché d'épaves,
+à côté de sa **capsule de survie écrasée** (posée une fois par monde, près de 0,0), avec un kit minimal :
+chalumeau plasma usé, pistolet blaster **endommagé**, 4 cartouches, du pain. Il réapparaît là s'il meurt
+sans lit.
+
+La capsule sert de tutoriel : elle contient un **banc de diagnostic** (découper 2 ferrailles dans sa coque
+au chalumeau → réparer le pistolet), une caisse et une conduite de carburant (à découper accroupi !).
+
+- Terrain : relief de l'Overworld sans eau (niveau de la mer tout en bas) ; biomes : dunes, mesas rouges
+  striées, cuvettes de sel (anciens océans), champs de ferraille. Ciel orange, pas de pluie.
+- Épaves bien plus fréquentes que dans l'Overworld ; pillards (soldats) et husks la nuit.
+- `config/omni-common.toml` → `startOnKhessar = false` pour désactiver ce départ.
+- `/omni travel overworld|khessar` (opérateurs) pour passer d'un monde à l'autre en attendant les vaisseaux.
 
 ## Épaves (pilier ferrailleur)
 

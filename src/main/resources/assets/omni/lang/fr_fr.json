@@ -75,5 +75,13 @@
   "tooltip.omni.damaged": "Endommagé : à recalibrer au banc de diagnostic",
   "message.omni.bench.need_scrap": "Il faut %s ferrailles pour recalibrer",
   "message.omni.bench.repaired": "%s recalibré",
-  "message.omni.attachment.damaged": "Cet accessoire doit d'abord être recalibré"
+  "message.omni.attachment.damaged": "Cet accessoire doit d'abord être recalibré",
+  "biome.omni.khessar_dunes": "Dunes de Khessar",
+  "biome.omni.khessar_mesas": "Mesas de Khessar",
+  "biome.omni.khessar_salt_flats": "Cuvettes de sel de Khessar",
+  "biome.omni.khessar_scrapfields": "Champs de ferraille de Khessar",
+  "title.omni.crash": "Crash sur Khessar",
+  "subtitle.omni.crash": "Votre vaisseau est perdu. Récupérez ce que vous pouvez.",
+  "message.omni.crash.hint": "Le banc de diagnostic de votre capsule peut réparer votre blaster : découpez 2 ferrailles dans la coque au chalumeau.",
+  "commands.omni.travel": "Voyage vers %s"
 }

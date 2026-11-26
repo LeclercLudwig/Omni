@@ -31,7 +31,8 @@ public class Omni {
         return ResourceLocation.fromNamespaceAndPath(MODID, path);
     }
 
-    public Omni(IEventBus modBus) {
+    public Omni(IEventBus modBus, net.neoforged.fml.ModContainer container) {
+        container.registerConfig(net.neoforged.fml.config.ModConfig.Type.COMMON, OmniConfig.SPEC);
         OmniComponents.COMPONENTS.register(modBus);
         OmniBlocks.BLOCKS.register(modBus);
         OmniItems.ITEMS.register(modBus);
@@ -46,6 +47,10 @@ public class Omni {
         // Les armes sont lues depuis data/<namespace>/omni_weapons/*.json (rechargeables avec /reload).
         NeoForge.EVENT_BUS.addListener(WeaponManager::onAddReloadListeners);
         NeoForge.EVENT_BUS.addListener(OmniNetwork::onDatapackSync);
+
+        // Début de partie sur Khessar, après un crash.
+        NeoForge.EVENT_BUS.addListener(com.omni.planet.CrashLanding::onPlayerLoggedIn);
+        NeoForge.EVENT_BUS.addListener(com.omni.planet.OmniCommands::register);
     }
 
     private static void registerAttributes(EntityAttributeCreationEvent event) {

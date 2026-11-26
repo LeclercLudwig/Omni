@@ -75,5 +75,13 @@
   "tooltip.omni.damaged": "Damaged: recalibrate at a diagnostic bench",
   "message.omni.bench.need_scrap": "Recalibration needs %s scrap metal",
   "message.omni.bench.repaired": "%s recalibrated",
-  "message.omni.attachment.damaged": "This attachment must be recalibrated first"
+  "message.omni.attachment.damaged": "This attachment must be recalibrated first",
+  "biome.omni.khessar_dunes": "Khessar Dunes",
+  "biome.omni.khessar_mesas": "Khessar Mesas",
+  "biome.omni.khessar_salt_flats": "Khessar Salt Flats",
+  "biome.omni.khessar_scrapfields": "Khessar Scrapfields",
+  "title.omni.crash": "Crash landing on Khessar",
+  "subtitle.omni.crash": "Your ship is gone. Salvage what you can.",
+  "message.omni.crash.hint": "Your pod's diagnostic bench can repair your damaged blaster: cut 2 scrap metal from the hull with your plasma cutter.",
+  "commands.omni.travel": "Travelled to %s"
 }
